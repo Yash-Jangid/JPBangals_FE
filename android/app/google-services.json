@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "847613477366",
+    "project_id": "edurise-app",
+    "storage_bucket": "edurise-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847613477366:android:a1b2c3d4e5f6g7h8",
+        "android_client_info": {
+          "package_name": "com.eduriseapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "847613477366-7cf1dfqkllv50p0smcbvg0s2djak9r9l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvOiuR6mnlwEBIwJuLzOiC8sBHBkFNbBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "847613477366-7cf1dfqkllv50p0smcbvg0s2djak9r9l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

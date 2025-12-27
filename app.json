@@ -1,0 +1,10 @@
+{
+  "name": "EduriseApp",
+  "displayName": "EduriseApp",
+  "android": {
+    "package": "com.eduriseapp"
+  },
+  "ios": {
+    "bundleIdentifier": "com.eduriseapp"
+  }
+}
