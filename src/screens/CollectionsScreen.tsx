@@ -15,10 +15,12 @@ import { colors } from '../theme/colors';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchProducts, fetchCategories } from '../store/slices/productsSlice';
+import { useTheme } from '../theme/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
 export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ navigation, route }) => {
+  const { theme } = useTheme();
   const dispatch = useAppDispatch();
   const { products, categories, loading } = useAppSelector((state) => state.products);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(route.params?.categoryId || null);
@@ -51,18 +53,20 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
   };
 
   const renderCategoryFilter = () => (
-    <View style={styles.filterContainer}>
+    <View style={[styles.filterContainer, { backgroundColor: theme.colors.background }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
         <TouchableOpacity
           style={[
             styles.filterChip,
             selectedCategory === null && styles.filterChipSelected,
+            { backgroundColor: theme.colors.background }
           ]}
           onPress={() => handleCategoryPress(null)}
         >
           <Text style={[
             styles.filterText,
             selectedCategory === null && styles.filterTextSelected,
+            { color: theme.colors.text }
           ]}>All</Text>
         </TouchableOpacity>
         {categories.map((category) => (
@@ -71,6 +75,7 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
             style={[
               styles.filterChip,
               selectedCategory === category.id && styles.filterChipSelected,
+              { backgroundColor: theme.colors.background }
             ]}
             onPress={() => handleCategoryPress(category.id)}
           >
@@ -94,17 +99,17 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
         style={styles.productImage}
       />
       <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.productPrice}>₹{item.sellingPrice}</Text>
+        <Text style={[styles.productName, { color: theme.colors.text }]} numberOfLines={1}>{item.name}</Text>
+        <Text style={[styles.productPrice, { color: theme.colors.text }]} >₹{item.sellingPrice}</Text>
         {item.discount > 0 && (
-          <Text style={styles.productOriginalPrice}>₹{item.mrp}</Text>
+          <Text style={[styles.productOriginalPrice, { color: theme.colors.text }]} >₹{item.mrp}</Text>
         )}
       </View>
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <CustomHeader title="Collections" showBackButton onBackPress={() => navigation.goBack()} />
 
       {renderCategoryFilter()}
@@ -124,7 +129,7 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
           columnWrapperStyle={styles.columnWrapper}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text>No products found in this category.</Text>
+              <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>No products found in this category.</Text>
             </View>
           }
         />
@@ -221,5 +226,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 50,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.medium,
+    color: colors.text.primary,
+    marginBottom: 16,
   },
 });

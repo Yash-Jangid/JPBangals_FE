@@ -14,8 +14,10 @@ import { colors } from '../theme/colors';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchCart, updateCartItem, removeFromCart } from '../store/slices/cartSlice';
+import { useTheme } from '../theme/ThemeContext';
 
 export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const { theme } = useTheme();
   const dispatch = useAppDispatch();
   const { items, totalAmount, loading, actionLoading } = useAppSelector((state) => state.cart);
 
@@ -96,7 +98,7 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   if (loading && (!items || items.length === 0)) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <CustomHeader title="Shopping Cart" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary.main} />
@@ -107,7 +109,7 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   if (!items || items.length === 0) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <CustomHeader title="Shopping Cart" />
         {renderEmptyCart()}
       </View>
@@ -120,7 +122,7 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const total = subtotal + shipping;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <CustomHeader title="Shopping Cart" />
 
       <FlatList

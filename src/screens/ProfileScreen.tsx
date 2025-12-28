@@ -9,6 +9,7 @@ import {
     ActivityIndicator,
     Alert,
     RefreshControl,
+    Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { CustomHeader } from '../components/CustomHeader';
@@ -17,22 +18,26 @@ import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logoutUser } from '../store/slices/authSlice';
 import { fetchOrders } from '../store/slices/ordersSlice';
+import { useTheme } from '../theme/ThemeContext';
+
+const { width } = Dimensions.get('window');
 
 export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isGuestMode } = useAppSelector((state) => state.auth);
+    const { theme, themeMode, setThemeMode } = useTheme();
     const { orders, loading: ordersLoading } = useAppSelector((state) => state.orders);
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && !isGuestMode) {
             loadData();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, isGuestMode]);
 
     const loadData = async () => {
         try {
-            await dispatch(fetchOrders()).unwrap();
+            await dispatch(fetchOrders({ page: 1, limit: 10 })).unwrap();
         } catch (error) {
             console.error('Error loading profile data:', error);
         }
@@ -65,98 +70,187 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         );
     };
 
-    // Calculate stats from real data
-    const totalOrders = orders.length;
-    const totalSpent = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const handleLogin = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'Login' }],
+        });
+    };
 
-    const menuItems = [
-        {
-            id: 1,
-            title: 'My Orders',
-            icon: '📦',
-            route: 'Orders',
-            badge: totalOrders > 0 ? totalOrders.toString() : undefined,
-        },
-        {
-            id: 2,
-            title: 'Wishlist',
-            icon: '❤️',
-            route: 'Wishlist',
-        },
-        {
-            id: 3,
-            title: 'Addresses',
-            icon: '📍',
-            route: 'Addresses',
-        },
-        {
-            id: 4,
-            title: 'Payment Methods',
-            icon: '💳',
-            route: 'PaymentMethods',
-        },
-        {
-            id: 5,
-            title: 'Help & Support',
-            icon: '💬',
-            route: 'Support',
-        },
-        {
-            id: 6,
-            title: 'About Us',
-            icon: 'ℹ️',
-            route: 'About',
-        },
+    // Guest Mode View
+    if (isGuestMode) {
+        return (
+            <View style={[styles.container, { backgroundColor: theme.colors.backgroundSecondary }]}>
+                <CustomHeader title="Profile" />
+                <ScrollView contentContainerStyle={styles.guestContainer}>
+                    <View style={styles.guestContent}>
+                        <View style={styles.guestIconContainer}>
+                            <Text style={styles.guestIcon}>👤</Text>
+                        </View>
+                        <Text style={styles.guestTitle}>You're browsing as Guest</Text>
+                        <Text style={styles.guestSubtitle}>
+                            Login to access your orders, wishlist, and personalized recommendations
+                        </Text>
+
+                        <TouchableOpacity
+                            style={styles.modernLoginButton}
+                            onPress={handleLogin}
+                            activeOpacity={0.8}
+                        >
+                            <LinearGradient
+                                colors={['#D4AF37', '#F5E6B3', '#D4AF37']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.gradientButton}
+                            >
+                                <Text style={styles.modernLoginButtonText}>Login or Sign Up</Text>
+                                <Text style={styles.loginArrow}>→</Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+
+                        <View style={styles.guestFeatures}>
+                            <View style={styles.featureItem}>
+                                <Text style={styles.featureIcon}>📦</Text>
+                                <Text style={styles.featureText}>Track Orders</Text>
+                            </View>
+                            <View style={styles.featureItem}>
+                                <Text style={styles.featureIcon}>❤️</Text>
+                                <Text style={styles.featureText}>Save Wishlist</Text>
+                            </View>
+                            <View style={styles.featureItem}>
+                                <Text style={styles.featureIcon}>🎁</Text>
+                                <Text style={styles.featureText}>Exclusive Offers</Text>
+                            </View>
+                        </View>
+
+                        {/* Theme Selector for Guest */}
+                        <View style={styles.guestThemeSection}>
+                            <Text style={styles.guestThemeTitle}>Appearance</Text>
+                            <View style={styles.themeSelector}>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.themeOption,
+                                        themeMode === 'light' && styles.themeOptionActive,
+                                    ]}
+                                    onPress={() => setThemeMode('light')}
+                                >
+                                    <Text style={styles.themeIcon}>☀️</Text>
+                                    <Text style={[
+                                        styles.themeText,
+                                        themeMode === 'light' && styles.themeTextActive,
+                                    ]}>Light</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.themeOption,
+                                        themeMode === 'dark' && styles.themeOptionActive,
+                                    ]}
+                                    onPress={() => setThemeMode('dark')}
+                                >
+                                    <Text style={styles.themeIcon}>🌙</Text>
+                                    <Text style={[
+                                        styles.themeText,
+                                        themeMode === 'dark' && styles.themeTextActive,
+                                    ]}>Dark</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[
+                                        styles.themeOption,
+                                        themeMode === 'auto' && styles.themeOptionActive,
+                                    ]}
+                                    onPress={() => setThemeMode('auto')}
+                                >
+                                    <Text style={styles.themeIcon}>⚙️</Text>
+                                    <Text style={[
+                                        styles.themeText,
+                                        themeMode === 'auto' && styles.themeTextActive,
+                                    ]}>Auto</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </ScrollView>
+            </View>
+        );
+    }
+
+    // Calculate stats from real data
+    const totalOrders = orders?.length || 0;
+    const totalSpent = orders?.reduce((sum, order) => sum + order.totalAmount, 0) || 0;
+
+    const quickActions = [
+        { id: 1, title: 'My Orders', icon: '📦', route: 'Orders', color: '#FFE5E5' },
+        { id: 2, title: 'Wishlist', icon: '❤️', route: 'Wishlist', color: '#FFF0E5' },
+        { id: 3, title: 'Addresses', icon: '📍', route: 'Addresses', color: '#E5F5FF' },
+        { id: 4, title: 'Help', icon: '💬', route: 'Support', color: '#F0E5FF' },
     ];
 
-    const recentOrders = orders.slice(0, 2);
+    const recentOrders = orders?.slice(0, 2) || [];
 
     return (
-        <View style={styles.container}>
-            <CustomHeader title="My Profile" />
+        <View style={[styles.container, { backgroundColor: theme.colors.backgroundSecondary }]}>
+            <CustomHeader title="Profile" />
 
             <ScrollView
-                style={styles.scrollView}
+                style={[styles.scrollView, { backgroundColor: theme.colors.backgroundSecondary }]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
-                {/* Profile Header Card */}
+                {/* Profile Header */}
                 <View style={styles.profileHeader}>
-                    <View style={styles.avatarContainer}>
-                        <View style={styles.avatarCircle}>
-                            <Text style={styles.avatarText}>
-                                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                            </Text>
-                        </View>
+                    <View style={styles.avatarCircle}>
+                        <Text style={styles.avatarText}>
+                            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                        </Text>
                     </View>
-
-                    <Text style={styles.userName}>{user?.name || 'Guest User'}</Text>
+                    <Text style={styles.userName}>{user?.name || 'User'}</Text>
                     <Text style={styles.userEmail}>{user?.email || ''}</Text>
                 </View>
 
-                {/* Stats Cards */}
-                <View style={styles.statsContainer}>
-                    <View style={styles.statCard}>
+                {/* Stats Grid */}
+                <View style={styles.statsGrid}>
+                    <View style={styles.statBox}>
                         <Text style={styles.statValue}>{totalOrders}</Text>
                         <Text style={styles.statLabel}>Orders</Text>
                     </View>
-                    <View style={styles.statCard}>
+                    <View style={styles.statBox}>
                         <Text style={styles.statValue}>₹{(totalSpent / 1000).toFixed(1)}K</Text>
-                        <Text style={styles.statLabel}>Total Spent</Text>
+                        <Text style={styles.statLabel}>Spent</Text>
                     </View>
-                    <View style={styles.statCard}>
+                    <View style={styles.statBox}>
                         <Text style={styles.statValue}>0</Text>
                         <Text style={styles.statLabel}>Wishlist</Text>
                     </View>
                 </View>
 
-                {/* Recent Orders */}
+                {/* Quick Actions Grid */}
+                <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                        Quick Actions
+                    </Text>
+                    <View style={styles.actionsGrid}>
+                        {quickActions.map((action) => (
+                            <TouchableOpacity
+                                key={action.id}
+                                style={[styles.actionCard, { backgroundColor: action.color }]}
+                                onPress={() => navigation.navigate(action.route)}
+                            >
+                                <Text style={styles.actionIcon}>{action.icon}</Text>
+                                <Text style={styles.actionTitle}>{action.title}</Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Recent Activity */}
                 {recentOrders.length > 0 && (
                     <View style={styles.section}>
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>Recent Orders</Text>
+                        <View style={[styles.sectionHeader, { backgroundColor: theme.colors.backgroundSecondary }]}>
+                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+                                Recent Orders
+                            </Text>
                             <TouchableOpacity onPress={() => navigation.navigate('Orders')}>
                                 <Text style={styles.seeAllText}>View All</Text>
                             </TouchableOpacity>
@@ -168,31 +262,22 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                                 style={styles.orderCard}
                                 onPress={() => navigation.navigate('OrderDetails', { orderId: order.id })}
                             >
-                                <View style={styles.orderIconContainer}>
+                                <View style={styles.orderIconBox}>
                                     <Text style={styles.orderIcon}>📦</Text>
                                 </View>
-                                <View style={styles.orderDetails}>
-                                    <Text style={styles.orderName} numberOfLines={1}>
-                                        Order #{order.id}
-                                    </Text>
+                                <View style={styles.orderInfo}>
+                                    <Text style={styles.orderName}>Order #{order.id}</Text>
                                     <Text style={styles.orderDate}>
                                         {new Date(order.createdAt).toLocaleDateString()}
                                     </Text>
-                                    <View style={styles.orderFooter}>
-                                        <Text style={styles.orderAmount}>₹{order.totalAmount}</Text>
-                                        <View style={[
-                                            styles.orderStatusBadge,
-                                            order.status === 'delivered' && styles.statusDelivered,
-                                            order.status === 'pending' && styles.statusPending,
-                                        ]}>
-                                            <Text style={[
-                                                styles.orderStatus,
-                                                order.status === 'delivered' && styles.statusDeliveredText,
-                                                order.status === 'pending' && styles.statusPendingText,
-                                            ]}>
-                                                {order.status}
-                                            </Text>
-                                        </View>
+                                </View>
+                                <View style={styles.orderRight}>
+                                    <Text style={styles.orderAmount}>₹{order.totalAmount}</Text>
+                                    <View style={[
+                                        styles.statusBadge,
+                                        order.status === 'DELIVERED' && styles.statusDelivered,
+                                    ]}>
+                                        <Text style={styles.statusText}>{order.status}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -200,32 +285,50 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     </View>
                 )}
 
-                {/* Menu Items */}
+                {/* Theme Selector */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account</Text>
-
-                    {menuItems.map((item) => (
+                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Appearance</Text>
+                    <View style={styles.themeSelector}>
                         <TouchableOpacity
-                            key={item.id}
-                            style={styles.menuItem}
-                            onPress={() => navigation.navigate(item.route)}
+                            style={[
+                                styles.themeOption,
+                                themeMode === 'light' && styles.themeOptionActive,
+                            ]}
+                            onPress={() => setThemeMode('light')}
                         >
-                            <View style={styles.menuLeft}>
-                                <View style={styles.menuIconContainer}>
-                                    <Text style={styles.menuIcon}>{item.icon}</Text>
-                                </View>
-                                <Text style={styles.menuTitle}>{item.title}</Text>
-                            </View>
-                            <View style={styles.menuRight}>
-                                {item.badge && (
-                                    <View style={styles.badge}>
-                                        <Text style={styles.badgeText}>{item.badge}</Text>
-                                    </View>
-                                )}
-                                <Text style={styles.menuChevron}>›</Text>
-                            </View>
+                            <Text style={styles.themeIcon}>☀️</Text>
+                            <Text style={[
+                                styles.themeText,
+                                themeMode === 'light' && styles.themeTextActive,
+                            ]}>Light</Text>
                         </TouchableOpacity>
-                    ))}
+                        <TouchableOpacity
+                            style={[
+                                styles.themeOption,
+                                themeMode === 'dark' && styles.themeOptionActive,
+                            ]}
+                            onPress={() => setThemeMode('dark')}
+                        >
+                            <Text style={styles.themeIcon}>🌙</Text>
+                            <Text style={[
+                                styles.themeText,
+                                themeMode === 'dark' && styles.themeTextActive,
+                            ]}>Dark</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.themeOption,
+                                themeMode === 'auto' && styles.themeOptionActive,
+                            ]}
+                            onPress={() => setThemeMode('auto')}
+                        >
+                            <Text style={styles.themeIcon}>⚙️</Text>
+                            <Text style={[
+                                styles.themeText,
+                                themeMode === 'auto' && styles.themeTextActive,
+                            ]}>Auto</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Logout Button */}
@@ -242,22 +345,121 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8',
+        backgroundColor: '#F8F8F8', // Will be dynamic
     },
     scrollView: {
         flex: 1,
     },
+    // Guest Mode Styles
+    guestContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 24,
+    },
+    guestContent: {
+        alignItems: 'center',
+        width: '100%',
+        maxWidth: 400,
+    },
+    guestIconContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: '#F5F0E8',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    guestIcon: {
+        fontSize: 48,
+    },
+    guestTitle: {
+        fontSize: 24,
+        fontFamily: Fonts.bold,
+        color: '#1a1a1a',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    guestSubtitle: {
+        fontSize: 15,
+        fontFamily: Fonts.regular,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 32,
+        lineHeight: 22,
+    },
+    modernLoginButton: {
+        width: '100%',
+        height: 56,
+        borderRadius: 28,
+        overflow: 'hidden',
+        marginBottom: 40,
+        shadowColor: '#D4AF37',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+    gradientButton: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+    },
+    modernLoginButtonText: {
+        color: '#1a1a1a',
+        fontFamily: Fonts.bold,
+        fontSize: 17,
+        letterSpacing: 0.8,
+    },
+    loginArrow: {
+        color: '#1a1a1a',
+        fontSize: 20,
+        fontFamily: Fonts.bold,
+    },
+    guestFeatures: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+    },
+    featureItem: {
+        alignItems: 'center',
+    },
+    featureIcon: {
+        fontSize: 32,
+        marginBottom: 8,
+    },
+    featureText: {
+        fontSize: 13,
+        fontFamily: Fonts.medium,
+        color: '#666',
+    },
+    guestThemeSection: {
+        marginTop: 40,
+        width: '100%',
+    },
+    guestThemeTitle: {
+        fontSize: 16,
+        fontFamily: Fonts.semiBold,
+        color: '#1a1a1a',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    // Profile Styles
     profileHeader: {
-        backgroundColor: 'rgba(212, 175, 55, 0.08)',
+        backgroundColor: '#FFFFFF',
         paddingTop: 32,
         paddingBottom: 24,
-        paddingHorizontal: 24,
         alignItems: 'center',
         borderBottomLeftRadius: 24,
         borderBottomRightRadius: 24,
-    },
-    avatarContainer: {
-        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
     },
     avatarCircle: {
         width: 80,
@@ -266,11 +468,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#D4AF37',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 3,
-        borderColor: '#FFF',
-        shadowColor: '#000',
+        marginBottom: 16,
+        shadowColor: '#D4AF37',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
+        shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 4,
     },
@@ -280,7 +481,7 @@ const styles = StyleSheet.create({
         color: '#FFF',
     },
     userName: {
-        fontSize: 24,
+        fontSize: 22,
         fontFamily: Fonts.bold,
         color: '#1a1a1a',
         marginBottom: 4,
@@ -290,7 +491,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.regular,
         color: '#666',
     },
-    statsContainer: {
+    statsGrid: {
         flexDirection: 'row',
         justifyContent: 'space-around',
         paddingHorizontal: 16,
@@ -305,7 +506,7 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 2,
     },
-    statCard: {
+    statBox: {
         alignItems: 'center',
     },
     statValue: {
@@ -333,11 +534,40 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontFamily: Fonts.semiBold,
         color: '#1a1a1a',
+        marginBottom: 12,
     },
     seeAllText: {
         fontSize: 14,
         fontFamily: Fonts.medium,
         color: '#D4AF37',
+    },
+    actionsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    actionCard: {
+        width: (width - 44) / 2,
+        aspectRatio: 1.5,
+        borderRadius: 16,
+        padding: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    actionIcon: {
+        fontSize: 36,
+        marginBottom: 12,
+    },
+    actionTitle: {
+        fontSize: 14,
+        fontFamily: Fonts.semiBold,
+        color: '#1a1a1a',
+        textAlign: 'center',
     },
     orderCard: {
         flexDirection: 'row',
@@ -346,28 +576,29 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 12,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
-        shadowRadius: 8,
+        shadowRadius: 4,
         elevation: 2,
     },
-    orderIconContainer: {
-        width: 56,
-        height: 56,
+    orderIconBox: {
+        width: 48,
+        height: 48,
         borderRadius: 12,
         backgroundColor: '#F5F0E8',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
+        marginRight: 12,
     },
     orderIcon: {
-        fontSize: 28,
+        fontSize: 24,
     },
-    orderDetails: {
+    orderInfo: {
         flex: 1,
+        justifyContent: 'center',
     },
     orderName: {
-        fontSize: 16,
+        fontSize: 15,
         fontFamily: Fonts.semiBold,
         color: '#1a1a1a',
         marginBottom: 4,
@@ -376,98 +607,31 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontFamily: Fonts.regular,
         color: '#666',
-        marginBottom: 8,
     },
-    orderFooter: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    orderRight: {
+        alignItems: 'flex-end',
+        justifyContent: 'center',
     },
     orderAmount: {
         fontSize: 16,
         fontFamily: Fonts.bold,
         color: '#1a1a1a',
+        marginBottom: 6,
     },
-    orderStatusBadge: {
-        paddingHorizontal: 12,
+    statusBadge: {
+        paddingHorizontal: 10,
         paddingVertical: 4,
-        borderRadius: 12,
-        backgroundColor: '#E0E0E0',
+        borderRadius: 8,
+        backgroundColor: '#FFF3E0',
     },
     statusDelivered: {
         backgroundColor: '#E8F5E9',
     },
-    statusPending: {
-        backgroundColor: '#FFF3E0',
-    },
-    orderStatus: {
+    statusText: {
         fontSize: 11,
         fontFamily: Fonts.semiBold,
-        color: '#666',
-        textTransform: 'capitalize',
-    },
-    statusDeliveredText: {
-        color: '#2E7D32',
-    },
-    statusPendingText: {
         color: '#F57C00',
-    },
-    menuItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.03,
-        shadowRadius: 4,
-        elevation: 1,
-    },
-    menuLeft: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    menuIconContainer: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: '#F5F0E8',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 16,
-    },
-    menuIcon: {
-        fontSize: 20,
-    },
-    menuTitle: {
-        fontSize: 16,
-        fontFamily: Fonts.medium,
-        color: '#1a1a1a',
-    },
-    menuRight: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    badge: {
-        backgroundColor: '#D4AF37',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        marginRight: 8,
-        minWidth: 24,
-        alignItems: 'center',
-    },
-    badgeText: {
-        fontSize: 12,
-        fontFamily: Fonts.semiBold,
-        color: '#FFF',
-    },
-    menuChevron: {
-        fontSize: 24,
-        color: '#CCC',
+        textTransform: 'capitalize',
     },
     logoutButton: {
         marginHorizontal: 16,
@@ -478,10 +642,57 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#FF3B30',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 1,
     },
     logoutText: {
         fontSize: 16,
         fontFamily: Fonts.semiBold,
         color: '#FF3B30',
+    },
+    themeSelector: {
+        flexDirection: 'row',
+        backgroundColor: '#F5F5F5',
+        padding: 4,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    themeOption: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 10,
+        backgroundColor: 'transparent',
+        gap: 6,
+    },
+    themeOptionActive: {
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#D4AF37',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 2,
+    },
+    themeIcon: {
+        fontSize: 18,
+    },
+    themeText: {
+        fontSize: 12,
+        fontFamily: Fonts.semiBold,
+        color: '#666',
+    },
+    themeTextActive: {
+        color: '#D4AF37',
+        fontFamily: Fonts.semiBold,
     },
 });

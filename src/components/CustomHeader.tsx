@@ -7,15 +7,14 @@ import {
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../common/colors';
 import { Fonts } from '../common/fonts';
+import { useTheme } from '../theme/ThemeContext';
 
 interface CustomHeaderProps {
   title: string;
   showBackButton?: boolean;
   onBackPress?: () => void;
   rightComponent?: React.ReactNode;
-  backgroundColor?: string;
 }
 
 export const CustomHeader: React.FC<CustomHeaderProps> = ({
@@ -23,12 +22,20 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
   showBackButton = false,
   onBackPress,
   rightComponent,
-  backgroundColor = '#FFFFFF',
 }) => {
+  const { theme, isDark } = useTheme();
+
   return (
     <>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.background}
+      />
       <SafeAreaView
-        style={[styles.container, { backgroundColor }]}
+        style={[styles.container, {
+          backgroundColor: theme.colors.background,
+          borderBottomColor: theme.colors.border,
+        }]}
         edges={['top']}
       >
         <View style={styles.header}>
@@ -39,13 +46,13 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
                 onPress={onBackPress}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Text style={styles.backButtonText}>‹</Text>
+                <Text style={[styles.backButtonText, { color: theme.colors.text }]}>‹</Text>
               </TouchableOpacity>
             )}
           </View>
 
           <View style={styles.centerSection}>
-            <Text style={styles.title} numberOfLines={1}>
+            <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={1}>
               {title}
             </Text>
           </View>
@@ -62,13 +69,12 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 56,
+    height: 50,
     paddingHorizontal: 16,
   },
   leftSection: {
@@ -93,13 +99,11 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 32,
     fontFamily: Fonts.regular,
-    color: '#1a1a1a',
     lineHeight: 32,
   },
   title: {
     fontSize: 17,
     fontFamily: Fonts.semiBold,
-    color: '#1a1a1a',
     textAlign: 'center',
     letterSpacing: 0.2,
   },

@@ -18,6 +18,7 @@ import { colors } from '../theme/colors';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchFeaturedProducts, fetchCategories } from '../store/slices/productsSlice';
+import { useTheme } from '../theme/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +51,7 @@ const HERO_BANNERS = [
 ];
 
 export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+  const { theme } = useTheme();
   const dispatch = useAppDispatch();
   const { featuredProducts, categories, loading } = useAppSelector((state) => state.products);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
@@ -143,7 +145,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
   const renderQuickActions = () => (
     <View style={styles.quickActionsContainer}>
-      <Text style={styles.sectionTitle}>Quick Links</Text>
+      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Links</Text>
       <View style={styles.quickActionsGrid}>
         <TouchableOpacity
           style={styles.quickActionItem}
@@ -175,7 +177,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const renderCategories = () => (
     <View style={styles.categoriesContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Shop by Category</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Shop by Category</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Collections')}>
           <Text style={styles.seeAllText}>See All</Text>
         </TouchableOpacity>
@@ -197,7 +199,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 {/* Use a default icon if image is missing, or map category names to icons */}
                 {category.imageUrl ? '🖼️' : '✨'}
               </Text>
-              <Text style={styles.categoryTitle}>{category.name}</Text>
+              <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>{category.name}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -208,9 +210,9 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const renderFeaturedProducts = () => (
     <View style={styles.featuredCoursesContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Featured Bangles</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Featured Bangles</Text>
         <TouchableOpacity onPress={() => navigation.navigate('Collections')}>
-          <Text style={styles.seeAllText}>See All</Text>
+          <Text style={[styles.seeAllText, { color: theme.colors.primary }]}>See All</Text>
         </TouchableOpacity>
       </View>
 
@@ -221,8 +223,8 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       ) : !featuredProducts || featuredProducts.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyIcon}>💍</Text>
-          <Text style={styles.emptyTitle}>No bangles available</Text>
-          <Text style={styles.emptySubtitle}>
+          <Text style={[styles.emptyTitle, { color: theme.colors.text }]}>No bangles available</Text>
+          <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
             Check back later for new collections
           </Text>
         </View>
@@ -230,7 +232,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         featuredProducts.map((product) => (
           <TouchableOpacity
             key={product.id}
-            style={styles.courseCard}
+            style={[styles.courseCard, { backgroundColor: theme.colors.card }]}
             onPress={() => navigateToProductDetail(product.slug)}
           >
             <Image
@@ -238,14 +240,14 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               style={styles.courseImage}
             />
             <View style={styles.courseContent}>
-              <Text style={styles.courseTitle} numberOfLines={2}>
+              <Text style={[styles.courseTitle, { color: theme.colors.text }]} numberOfLines={2}>
                 {product.name}
               </Text>
-              <Text style={styles.courseInstructor}>{product.specifications?.material || 'Premium Material'}</Text>
+              <Text style={[styles.courseInstructor, { color: theme.colors.textSecondary }]}>{product.specifications?.material || 'Premium Material'}</Text>
               <View style={styles.courseStats}>
                 {/* Rating is not in product type yet, using static or removing */}
-                <Text style={styles.courseRating}>⭐ 4.8</Text>
-                <Text style={styles.coursePrice}>₹{product.sellingPrice}</Text>
+                <Text style={[styles.courseRating, { color: theme.colors.textSecondary }]}>⭐ 4.8</Text>
+                <Text style={[styles.coursePrice, { color: theme.colors.primary }]}>₹{product.sellingPrice}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -255,15 +257,20 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <CustomHeader title="Jaipur Bangles" />
 
       <ScrollView
-        style={styles.scrollView}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        style={{ backgroundColor: theme.colors.background }}
         showsVerticalScrollIndicator={false}
-      >
-        {renderWelcomeSection()}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#D4AF37']}
+          />
+        }
+      >  {renderWelcomeSection()}
         {renderQuickActions()}
         {renderCategories()}
         {renderFeaturedProducts()}

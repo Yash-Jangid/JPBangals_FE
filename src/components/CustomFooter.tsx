@@ -6,8 +6,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Colors } from '../common/colors';
 import { Fonts } from '../common/fonts';
+import { useTheme } from '../theme/ThemeContext';
 
 interface FooterItem {
   id: string;
@@ -25,9 +25,17 @@ export const CustomFooter: React.FC<CustomFooterProps> = ({
   items,
   activeItem,
 }) => {
+  const { theme } = useTheme();
+
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View style={styles.footer}>
+    <SafeAreaView
+      style={[styles.container, {
+        backgroundColor: theme.colors.background,
+        borderTopColor: theme.colors.border,
+      }]}
+      edges={['bottom']}
+    >
+      <View style={[styles.footer, { backgroundColor: theme.colors.background }]}>
         {items.map((item) => {
           const isActive = activeItem === item.id;
           return (
@@ -37,19 +45,18 @@ export const CustomFooter: React.FC<CustomFooterProps> = ({
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, isActive && styles.activeIconContainer]}>
-                <Text
-                  style={[
-                    styles.footerIcon,
-                    isActive && styles.activeIcon,
-                  ]}
-                >
+              <View style={[
+                styles.iconContainer,
+                isActive && { backgroundColor: theme.isDark ? 'rgba(212, 175, 55, 0.15)' : '#F5F0E8' }
+              ]}>
+                <Text style={styles.footerIcon}>
                   {item.icon}
                 </Text>
               </View>
               <Text
                 style={[
                   styles.footerLabel,
+                  { color: isActive ? theme.colors.primary : theme.colors.textSecondary },
                   isActive && styles.activeLabel,
                 ]}
               >
@@ -65,9 +72,7 @@ export const CustomFooter: React.FC<CustomFooterProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.08)',
     elevation: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
@@ -80,7 +85,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
   },
   footerItem: {
     flex: 1,
@@ -96,25 +100,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 2,
   },
-  activeIconContainer: {
-    backgroundColor: '#F5F0E8', // Light gold background
-  },
   footerIcon: {
     fontSize: 22,
-    color: '#666',
-  },
-  activeIcon: {
-    color: '#D4AF37', // Gold color
   },
   footerLabel: {
     fontSize: 10,
     fontFamily: Fonts.medium,
-    color: '#666',
     textAlign: 'center',
     letterSpacing: 0.2,
   },
   activeLabel: {
-    color: '#D4AF37',
     fontFamily: Fonts.semiBold,
   },
 });

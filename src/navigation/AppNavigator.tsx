@@ -27,18 +27,25 @@ import { WebViewScreen } from '../components/WebViewScreen';
 import { RootStackParamList, TabParamList } from '../types/navigation';
 import { Colors } from '../common/colors';
 import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 const MainTabNavigator = () => {
+  const { theme } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: Platform.OS === 'ios' ? styles.tabBarIOS : styles.tabBarAndroid,
-        tabBarActiveTintColor: colors.primary.main,
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarStyle: {
+          ...(Platform.OS === 'ios' ? styles.tabBarIOS : styles.tabBarAndroid),
+          backgroundColor: theme?.colors?.background || '#FFFFFF',
+          borderTopColor: theme?.colors?.border || 'rgba(0,0,0,0.08)',
+        },
+        tabBarActiveTintColor: '#D4AF37',
+        tabBarInactiveTintColor: theme?.colors?.textSecondary || '#8E8E93',
         tabBarLabelStyle: Platform.OS === 'ios' ? styles.tabLabelIOS : styles.tabLabelAndroid,
         tabBarIconStyle: Platform.OS === 'ios' ? styles.tabIconIOS : styles.tabIconAndroid,
         tabBarItemStyle: Platform.OS === 'ios' ? styles.tabItemIOS : styles.tabItemAndroid,
@@ -50,7 +57,7 @@ const MainTabNavigator = () => {
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ focused, color }) => (
-            <Icon name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+            <Text style={{ fontSize: 24 }}>🏠</Text>
           ),
         }}
       />
@@ -60,7 +67,7 @@ const MainTabNavigator = () => {
         options={{
           tabBarLabel: 'Collections',
           tabBarIcon: ({ focused, color }) => (
-            <Icon name={focused ? 'grid' : 'grid-outline'} size={24} color={color} />
+            <Text style={{ fontSize: 24 }}>💎</Text>
           ),
         }}
       />
@@ -70,7 +77,7 @@ const MainTabNavigator = () => {
         options={{
           tabBarLabel: 'Cart',
           tabBarIcon: ({ focused, color }) => (
-            <Icon name={focused ? 'cart' : 'cart-outline'} size={24} color={color} />
+            <Text style={{ fontSize: 24 }}>🛒</Text>
           ),
         }}
       />
@@ -78,9 +85,9 @@ const MainTabNavigator = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: 'Account',
           tabBarIcon: ({ focused, color }) => (
-            <Icon name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+            <Text style={{ fontSize: 24 }}>👤</Text>
           ),
         }}
       />

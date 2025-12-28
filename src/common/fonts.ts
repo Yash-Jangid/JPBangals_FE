@@ -1,32 +1,35 @@
 export const Fonts = {
-  // Font families
-  regular: 'SourceSans3-Regular',
-  medium: 'SourceSans3-Medium',
-  semiBold: 'SourceSans3-SemiBold',
-  bold: 'SourceSans3-Bold',
-  light: 'SourceSans3-Light',
-  
+  // Using system fonts that are elegant and widely available
+  regular: 'System',
+  medium: 'System',
+  semiBold: 'System',
+  bold: 'System',
+
   // Font sizes
   size: {
-    xs: 12,
-    sm: 14,
-    md: 16,
-    lg: 18,
+    xs: 11,
+    sm: 13,
+    md: 15,
+    lg: 17,
     xl: 20,
     xxl: 24,
-    xxxl: 28,
-    huge: 32,
+    xxxl: 32,
   },
-  
-  // Line heights
-  lineHeight: {
-    xs: 16,
-    sm: 20,
-    md: 22,
-    lg: 24,
-    xl: 28,
-    xxl: 32,
-    xxxl: 36,
-    huge: 40,
+
+  // Font weights (for dynamic styling)
+  weight: {
+    regular: '400' as const,
+    medium: '500' as const,
+    semiBold: '600' as const,
+    bold: '700' as const,
+    extraBold: '800' as const,
+  },
+
+  // Letter spacing for elegance
+  letterSpacing: {
+    tight: -0.5,
+    normal: 0,
+    wide: 0.5,
+    wider: 1,
   },
 };

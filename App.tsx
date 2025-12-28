@@ -10,6 +10,7 @@ import { Colors } from './src/common/colors';
 import { Fonts } from './src/common/fonts';
 import { store, persistor } from './src/store';
 import socialLoginService from './src/services/SocialLoginService';
+import { ThemeProvider } from './src/theme/ThemeContext';
 
 const LoadingScreen = () => (
   <View style={styles.loadingContainer}>
@@ -27,16 +28,13 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={<LoadingScreen />} persistor={persistor}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider>
-            {/* <StatusBar
-              barStyle="light-content"
-              backgroundColor={Colors.primary}
-              translucent={Platform.OS === 'android'}
-            /> */}
-            <AppNavigator />
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
+        <ThemeProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+              <AppNavigator />
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   );
