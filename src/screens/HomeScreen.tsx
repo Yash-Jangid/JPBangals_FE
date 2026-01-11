@@ -46,7 +46,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
         return nextIndex;
       });
-    }, 3000); // Change slide every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [banners]);
@@ -69,8 +69,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const navigateToCategory = (categoryId: number) => {
-    // Navigate to collections screen with category filter
+  const navigateToCategory = (categoryId: string) => {
     navigation.navigate('Collections', { categoryId });
   };
 
@@ -88,7 +87,7 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
 
     if (banners.length === 0) {
-      return null; // Don't show banner section if no banners
+      return null;
     }
 
     return (
@@ -179,17 +178,18 @@ export const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
           {categories.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              style={styles.categoryCard}
-              onPress={() => navigateToCategory(category.id)}
-            >
-              <Text style={styles.categoryIcon}>
-                {/* Use a default icon if image is missing, or map category names to icons */}
-                {category.imageUrl ? '🖼️' : '✨'}
-              </Text>
+            <View key={category.id} style={styles.categoryContainer}>
+              <TouchableOpacity
+                style={styles.categoryCircle}
+                onPress={() => navigateToCategory(category.id)}
+              >
+                <Image
+                  source={{ uri: category.imageUrl || 'https://via.placeholder.com/80/D4AF37/FFFFFF?text=Category' }}
+                  style={styles.categoryImage}
+                />
+              </TouchableOpacity>
               <Text style={[styles.categoryTitle, { color: theme.colors.text }]}>{category.name}</Text>
-            </TouchableOpacity>
+            </View>
           ))}
         </ScrollView>
       )}
@@ -384,29 +384,35 @@ const styles = StyleSheet.create({
   categoriesScroll: {
     marginHorizontal: -4,
   },
-  categoryCard: {
-    backgroundColor: Colors.card,
-    padding: 16,
-    borderRadius: 12,
+  categoryContainer: {
     alignItems: 'center',
-    marginHorizontal: 4,
-    minWidth: 100,
-    elevation: 2,
+    marginHorizontal: 8,
+    width: 80,
+  },
+  categoryCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    overflow: 'hidden',
+    elevation: 3,
     shadowColor: Colors.textPrimary,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.15,
     shadowRadius: 4,
+    backgroundColor: Colors.card,
   },
-  categoryIcon: {
-    fontSize: 32,
-    marginBottom: 8,
+  categoryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   categoryTitle: {
-    fontSize: Fonts.size.sm,
+    fontSize: Fonts.size.xs,
     fontFamily: Fonts.medium,
     color: Colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 4,
+    marginTop: 8,
+    maxWidth: 80,
   },
   featuredCoursesContainer: {
     padding: 20,

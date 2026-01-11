@@ -1,5 +1,5 @@
 const Images = {
-  logo: require('../assets/images/logo.png'),
+  logo: require('../assets/images/banglesLogo.png'),
   chevron_right: require('../assets/images/chevron_right.png'),
   onboarding1: require('../assets/images/onboarding1.png'),
   onboarding2: require('../assets/images/onboarding2.png'),

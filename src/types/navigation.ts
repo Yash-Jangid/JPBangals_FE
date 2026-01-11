@@ -2,27 +2,27 @@ export type RootStackParamList = {
   // Auth
   Login: undefined;
   SignUp: undefined;
-  
+
   // Main Tab
   Main: undefined;
-  
+
   // Shop
-  ProductDetails: { productId: number };
-  CategoryProducts: { categoryId: number; categoryName: string };
-  
+  ProductDetails: { productId: string };
+  CategoryProducts: { categoryId: string; categoryName: string };
+
   // Cart & Checkout
   Cart: undefined;
   Checkout: undefined;
-  OrderSuccess: { orderId: number };
-  
+  OrderSuccess: { orderId: string };
+
   // Orders
   OrderHistory: undefined;
-  OrderDetails: { orderId: number };
-  
+  OrderDetails: { orderId: string };
+
   // Profile
   Profile: undefined;
   Notifications: undefined;
-  
+
   // Legacy/Utility (Keep if needed for now, or remove if sure)
   WebView: { route: string; title: string };
 };

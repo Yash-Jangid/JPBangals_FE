@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-    BASE_URL: __DEV__ ? 'http://10.0.2.2:3000' : 'https://api.jaipurbangles.com',
+    BASE_URL: 'https://bangles-jaipur-backend.onrender.com',
 
     // API Version
     VERSION: 'v1',
@@ -22,7 +22,7 @@ export const API_CONFIG = {
             PROFILE: '/users/profile',
             UPDATE_PROFILE: '/users/profile',
             ADDRESSES: '/users/addresses',
-            BY_ID: (id: number) => `/users/${id}`,
+            BY_ID: (id: string) => `/users/${id}`,
         },
 
         // Products
@@ -34,15 +34,15 @@ export const API_CONFIG = {
         // Categories
         CATEGORIES: {
             LIST: '/categories',
-            DETAILS: (id: number) => `/categories/${id}`,
+            DETAILS: (id: string) => `/categories/${id}`,
         },
 
         // Cart
         CART: {
             ITEMS: '/cart/items',
             ADD: '/cart/items',
-            UPDATE: (itemId: number) => `/cart/items/${itemId}`,
-            REMOVE: (itemId: number) => `/cart/items/${itemId}`,
+            UPDATE: (itemId: string) => `/cart/items/${itemId}`,
+            REMOVE: (itemId: string) => `/cart/items/${itemId}`,
             CLEAR: '/cart/clear',
         },
 
@@ -50,7 +50,7 @@ export const API_CONFIG = {
         ORDERS: {
             CREATE: '/orders',
             LIST: '/orders',
-            DETAILS: (id: number) => `/orders/${id}`,
+            DETAILS: (id: string) => `/orders/${id}`,
         },
 
         // Banners

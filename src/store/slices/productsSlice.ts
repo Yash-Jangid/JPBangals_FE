@@ -125,7 +125,7 @@ const productsSlice = createSlice({
             })
             .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.loading.products = false;
-                state.products = action.payload.data;
+                state.products = action.payload.items;
                 state.meta = action.payload.meta;
             })
             .addCase(fetchProducts.rejected, (state, action) => {
@@ -141,7 +141,7 @@ const productsSlice = createSlice({
             })
             .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
                 state.loading.featuredProducts = false;
-                state.featuredProducts = action.payload.data;
+                state.featuredProducts = action.payload.items;
             })
             .addCase(fetchFeaturedProducts.rejected, (state, action) => {
                 state.loading.featuredProducts = false;

@@ -23,7 +23,7 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
   const { products, categories, loading } = useAppSelector((state) => state.products);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(route.params?.categoryId || null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(route.params?.categoryId || null);
 
   useEffect(() => {
     // Fetch categories if not loaded
@@ -44,7 +44,7 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
     }));
   };
 
-  const handleCategoryPress = (categoryId: number | null) => {
+  const handleCategoryPress = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
   };
 
@@ -101,7 +101,7 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
       <View style={styles.productInfo}>
         <Text style={[styles.productName, { color: theme.colors.text }]} numberOfLines={1}>{item.name}</Text>
         <Text style={[styles.productPrice, { color: theme.colors.text }]} >₹{item.sellingPrice}</Text>
-        {item.discount > 0 && (
+        {parseFloat(item.discountPercentage) > 0 && (
           <Text style={[styles.productOriginalPrice, { color: theme.colors.text }]} >₹{item.mrp}</Text>
         )}
       </View>

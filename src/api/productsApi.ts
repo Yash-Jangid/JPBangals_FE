@@ -4,7 +4,7 @@ import { BackendResponse } from './authApi';
 
 // Product Types
 export interface ProductImage {
-  id: number;
+  id: string;
   imageUrl: string;
   thumbnailUrl: string;
   altText: string;
@@ -20,13 +20,13 @@ export interface ProductSpecifications {
 }
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   slug: string;
   description: string;
-  mrp: number;
-  sellingPrice: number;
-  discount: number;
+  mrp: string;
+  sellingPrice: string;
+  discountPercentage: string;
   stockQuantity: number;
   lowStockThreshold: number;
   sku: string;
@@ -34,14 +34,14 @@ export interface Product {
   isFeatured: boolean;
   isActive: boolean;
   images: ProductImage[];
-  categoryId: number;
-  collectionId: number | null;
+  categoryId: string;
+  collectionId: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ProductsListResponse {
-  data: Product[];
+  items: Product[];
   meta: {
     total: number;
     page: number;
@@ -55,8 +55,8 @@ export interface ProductsQueryParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'ASC' | 'DESC';
-  categoryId?: number;
-  collectionId?: number;
+  categoryId?: string;
+  collectionId?: string;
   minPrice?: number;
   maxPrice?: number;
   search?: string;
@@ -79,6 +79,7 @@ export const getProducts = async (params?: ProductsQueryParams): Promise<Backend
 
     const url = `${API_CONFIG.ENDPOINTS.PRODUCTS.LIST}?${queryParams.toString()}`;
     const response = await apiClient.get<BackendResponse<ProductsListResponse>>(url);
+    console.log("Products response.data", response.data);
     return response.data;
   } catch (error) {
     throw new Error(handleApiError(error));

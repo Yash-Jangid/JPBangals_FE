@@ -4,7 +4,7 @@ import { BackendResponse } from './authApi';
 
 // Category Types
 export interface Category {
-    id: number;
+    id: string;
     name: string;
     slug: string;
     description: string | null;
@@ -39,7 +39,7 @@ export const getCategories = async (): Promise<BackendResponse<Category[]>> => {
 /**
  * Get category by ID
  */
-export const getCategoryById = async (id: number): Promise<BackendResponse<Category>> => {
+export const getCategoryById = async (id: string): Promise<BackendResponse<Category>> => {
     try {
         const response = await apiClient.get<BackendResponse<Category>>(
             API_CONFIG.ENDPOINTS.CATEGORIES.DETAILS(id)
