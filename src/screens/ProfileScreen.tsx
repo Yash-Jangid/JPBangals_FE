@@ -6,27 +6,40 @@ import {
     StyleSheet,
     TouchableOpacity,
     Image,
-    ActivityIndicator,
     Alert,
     RefreshControl,
     Dimensions,
+    ViewStyle,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { CustomHeader } from '../components/CustomHeader';
-import { colors } from '../theme/colors';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { logoutUser } from '../store/slices/authSlice';
 import { fetchOrders } from '../store/slices/ordersSlice';
 import { useTheme } from '../theme/ThemeContext';
+import {
+    ShoppingBag,
+    ChevronRight,
+    Package,
+    Heart,
+    MapPin,
+    LifeBuoy,
+    Settings,
+    LogOut,
+    User,
+    Moon,
+    Sun,
+    Monitor
+} from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
 export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const dispatch = useAppDispatch();
     const { user, isAuthenticated, isGuestMode } = useAppSelector((state) => state.auth);
-    const { theme, themeMode, setThemeMode } = useTheme();
-    const { orders, loading: ordersLoading } = useAppSelector((state) => state.orders);
+    const { theme, themeMode, setThemeMode, isDark } = useTheme();
+    const { orders } = useAppSelector((state) => state.orders);
     const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
@@ -77,18 +90,42 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
         });
     };
 
+    const MenuLink = ({ title, icon: IconComponent, onPress, subtitle }: { title: string, icon: any, onPress: () => void, subtitle?: string }) => (
+        <TouchableOpacity
+            style={[styles.menuItem, { borderBottomColor: theme.colors.border }]}
+            onPress={onPress}
+            activeOpacity={0.7}
+        >
+            <View style={[styles.menuIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#F5F5F5' }]}>
+                <IconComponent size={20} color={theme.colors.text} />
+            </View>
+            <View style={styles.menuTextContainer}>
+                <Text style={[styles.menuTitle, { color: theme.colors.text }]}>{title}</Text>
+                {subtitle && <Text style={[styles.menuSubtitle, { color: theme.colors.textSecondary }]}>{subtitle}</Text>}
+            </View>
+            <ChevronRight size={20} color={theme.colors.textSecondary} />
+        </TouchableOpacity>
+    );
+
     // Guest Mode View
     if (isGuestMode) {
         return (
-            <View style={[styles.container, { backgroundColor: theme.colors.backgroundSecondary }]}>
-                <CustomHeader title="Profile" />
+            <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+                <CustomHeader
+                    title="Profile"
+                    rightComponent={
+                        <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+                            <ShoppingBag size={24} color={theme.colors.text} />
+                        </TouchableOpacity>
+                    }
+                />
                 <ScrollView contentContainerStyle={styles.guestContainer}>
                     <View style={styles.guestContent}>
-                        <View style={styles.guestIconContainer}>
-                            <Text style={styles.guestIcon}>👤</Text>
+                        <View style={[styles.guestIconContainer, { backgroundColor: theme.colors.card }]}>
+                            <User size={48} color={theme.colors.primary} />
                         </View>
-                        <Text style={styles.guestTitle}>You're browsing as Guest</Text>
-                        <Text style={styles.guestSubtitle}>
+                        <Text style={[styles.guestTitle, { color: theme.colors.text }]}>You're browsing as Guest</Text>
+                        <Text style={[styles.guestSubtitle, { color: theme.colors.textSecondary }]}>
                             Login to access your orders, wishlist, and personalized recommendations
                         </Text>
 
@@ -98,245 +135,131 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                             activeOpacity={0.8}
                         >
                             <LinearGradient
-                                colors={['#D4AF37', '#F5E6B3', '#D4AF37']}
+                                colors={[theme.colors.primary, '#D4AF37']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
                                 style={styles.gradientButton}
                             >
                                 <Text style={styles.modernLoginButtonText}>Login or Sign Up</Text>
-                                <Text style={styles.loginArrow}>→</Text>
+                                <ChevronRight size={20} color="#FFF" />
                             </LinearGradient>
                         </TouchableOpacity>
-
-                        <View style={styles.guestFeatures}>
-                            <View style={styles.featureItem}>
-                                <Text style={styles.featureIcon}>📦</Text>
-                                <Text style={styles.featureText}>Track Orders</Text>
-                            </View>
-                            <View style={styles.featureItem}>
-                                <Text style={styles.featureIcon}>❤️</Text>
-                                <Text style={styles.featureText}>Save Wishlist</Text>
-                            </View>
-                            <View style={styles.featureItem}>
-                                <Text style={styles.featureIcon}>🎁</Text>
-                                <Text style={styles.featureText}>Exclusive Offers</Text>
-                            </View>
-                        </View>
-
-                        {/* Theme Selector for Guest */}
-                        <View style={styles.guestThemeSection}>
-                            <Text style={styles.guestThemeTitle}>Appearance</Text>
-                            <View style={styles.themeSelector}>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.themeOption,
-                                        themeMode === 'light' && styles.themeOptionActive,
-                                    ]}
-                                    onPress={() => setThemeMode('light')}
-                                >
-                                    <Text style={styles.themeIcon}>☀️</Text>
-                                    <Text style={[
-                                        styles.themeText,
-                                        themeMode === 'light' && styles.themeTextActive,
-                                    ]}>Light</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.themeOption,
-                                        themeMode === 'dark' && styles.themeOptionActive,
-                                    ]}
-                                    onPress={() => setThemeMode('dark')}
-                                >
-                                    <Text style={styles.themeIcon}>🌙</Text>
-                                    <Text style={[
-                                        styles.themeText,
-                                        themeMode === 'dark' && styles.themeTextActive,
-                                    ]}>Dark</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={[
-                                        styles.themeOption,
-                                        themeMode === 'auto' && styles.themeOptionActive,
-                                    ]}
-                                    onPress={() => setThemeMode('auto')}
-                                >
-                                    <Text style={styles.themeIcon}>⚙️</Text>
-                                    <Text style={[
-                                        styles.themeText,
-                                        themeMode === 'auto' && styles.themeTextActive,
-                                    ]}>Auto</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
                     </View>
                 </ScrollView>
             </View>
         );
     }
 
-    // Calculate stats from real data
     const totalOrders = orders?.length || 0;
-    const totalSpent = orders?.reduce((sum, order) => sum + order.totalAmount, 0) || 0;
-
-    const quickActions = [
-        { id: 1, title: 'My Orders', icon: '📦', route: 'Orders', color: '#FFE5E5' },
-        { id: 2, title: 'Wishlist', icon: '❤️', route: 'Wishlist', color: '#FFF0E5' },
-        { id: 3, title: 'Addresses', icon: '📍', route: 'Addresses', color: '#E5F5FF' },
-        { id: 4, title: 'Help', icon: '💬', route: 'Support', color: '#F0E5FF' },
-    ];
-
-    const recentOrders = orders?.slice(0, 2) || [];
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.backgroundSecondary }]}>
-            <CustomHeader title="Profile" />
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <CustomHeader
+                title="Profile"
+                rightComponent={
+                    <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
+                        <ShoppingBag size={24} color={theme.colors.text} />
+                    </TouchableOpacity>
+                }
+            />
 
             <ScrollView
                 style={[styles.scrollView, { backgroundColor: theme.colors.backgroundSecondary }]}
                 showsVerticalScrollIndicator={false}
                 refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.colors.primary} />
                 }
             >
                 {/* Profile Header */}
-                <View style={styles.profileHeader}>
-                    <View style={styles.avatarCircle}>
-                        <Text style={styles.avatarText}>
-                            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                        </Text>
-                    </View>
-                    <Text style={styles.userName}>{user?.name || 'User'}</Text>
-                    <Text style={styles.userEmail}>{user?.email || ''}</Text>
-                </View>
-
-                {/* Stats Grid */}
-                <View style={styles.statsGrid}>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statValue}>{totalOrders}</Text>
-                        <Text style={styles.statLabel}>Orders</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statValue}>₹{(totalSpent / 1000).toFixed(1)}K</Text>
-                        <Text style={styles.statLabel}>Spent</Text>
-                    </View>
-                    <View style={styles.statBox}>
-                        <Text style={styles.statValue}>0</Text>
-                        <Text style={styles.statLabel}>Wishlist</Text>
-                    </View>
-                </View>
-
-                {/* Quick Actions Grid */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                        Quick Actions
-                    </Text>
-                    <View style={styles.actionsGrid}>
-                        {quickActions.map((action) => (
-                            <TouchableOpacity
-                                key={action.id}
-                                style={[styles.actionCard, { backgroundColor: action.color }]}
-                                onPress={() => navigation.navigate(action.route)}
-                            >
-                                <Text style={styles.actionIcon}>{action.icon}</Text>
-                                <Text style={styles.actionTitle}>{action.title}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-
-                {/* Recent Activity */}
-                {recentOrders.length > 0 && (
-                    <View style={styles.section}>
-                        <View style={[styles.sectionHeader, { backgroundColor: theme.colors.backgroundSecondary }]}>
-                            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-                                Recent Orders
+                <View style={[styles.profileHeader, { backgroundColor: theme.colors.background }]}>
+                    <View style={styles.profileInfoContainer}>
+                        <View style={[styles.avatarCircle, { backgroundColor: theme.colors.primary }]}>
+                            <Text style={styles.avatarText}>
+                                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                             </Text>
-                            <TouchableOpacity onPress={() => navigation.navigate('Orders')}>
-                                <Text style={styles.seeAllText}>View All</Text>
+                        </View>
+                        <View style={styles.userInfo}>
+                            <Text style={[styles.userName, { color: theme.colors.text }]}>{user?.name || 'User'}</Text>
+                            <Text style={[styles.userEmail, { color: theme.colors.textSecondary }]}>{user?.email || ''}</Text>
+                            <TouchableOpacity style={styles.editProfileBtn}>
+                                <Text style={[styles.editProfileText, { color: theme.colors.primary }]}>Edit Profile</Text>
                             </TouchableOpacity>
                         </View>
-
-                        {recentOrders.map((order) => (
-                            <TouchableOpacity
-                                key={order.id}
-                                style={styles.orderCard}
-                                onPress={() => navigation.navigate('OrderDetails', { orderId: order.id })}
-                            >
-                                <View style={styles.orderIconBox}>
-                                    <Text style={styles.orderIcon}>📦</Text>
-                                </View>
-                                <View style={styles.orderInfo}>
-                                    <Text style={styles.orderName}>Order #{order.id}</Text>
-                                    <Text style={styles.orderDate}>
-                                        {new Date(order.createdAt).toLocaleDateString()}
-                                    </Text>
-                                </View>
-                                <View style={styles.orderRight}>
-                                    <Text style={styles.orderAmount}>₹{order.totalAmount}</Text>
-                                    <View style={[
-                                        styles.statusBadge,
-                                        order.status === 'DELIVERED' && styles.statusDelivered,
-                                    ]}>
-                                        <Text style={styles.statusText}>{order.status}</Text>
-                                    </View>
-                                </View>
-                            </TouchableOpacity>
-                        ))}
                     </View>
-                )}
+                </View>
 
-                {/* Theme Selector */}
-                <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Appearance</Text>
-                    <View style={styles.themeSelector}>
-                        <TouchableOpacity
-                            style={[
-                                styles.themeOption,
-                                themeMode === 'light' && styles.themeOptionActive,
-                            ]}
-                            onPress={() => setThemeMode('light')}
-                        >
-                            <Text style={styles.themeIcon}>☀️</Text>
-                            <Text style={[
-                                styles.themeText,
-                                themeMode === 'light' && styles.themeTextActive,
-                            ]}>Light</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.themeOption,
-                                themeMode === 'dark' && styles.themeOptionActive,
-                            ]}
-                            onPress={() => setThemeMode('dark')}
-                        >
-                            <Text style={styles.themeIcon}>🌙</Text>
-                            <Text style={[
-                                styles.themeText,
-                                themeMode === 'dark' && styles.themeTextActive,
-                            ]}>Dark</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.themeOption,
-                                themeMode === 'auto' && styles.themeOptionActive,
-                            ]}
-                            onPress={() => setThemeMode('auto')}
-                        >
-                            <Text style={styles.themeIcon}>⚙️</Text>
-                            <Text style={[
-                                styles.themeText,
-                                themeMode === 'auto' && styles.themeTextActive,
-                            ]}>Auto</Text>
-                        </TouchableOpacity>
-                    </View>
+                {/* Account Settings Section */}
+                <View style={[styles.sectionContainer, { backgroundColor: theme.colors.background }]}>
+                    <Text style={[styles.sectionHeaderTitle, { color: theme.colors.textSecondary }]}>MY ACCOUNT</Text>
+
+                    <MenuLink
+                        title="Orders"
+                        subtitle={`Check your order status (${totalOrders})`}
+                        icon={Package}
+                        onPress={() => navigation.navigate('Orders')}
+                    />
+                    <MenuLink
+                        title="Wishlist"
+                        subtitle="Your favorite items"
+                        icon={Heart}
+                        onPress={() => { }}
+                    />
+                    <MenuLink
+                        title="Addresses"
+                        subtitle="Manage delivery addresses"
+                        icon={MapPin}
+                        onPress={() => { }}
+                    />
+                    <MenuLink
+                        title="Help Center"
+                        subtitle="Help regarding your recent purchases"
+                        icon={LifeBuoy}
+                        onPress={() => { }}
+                    />
+                </View>
+
+                {/* App Settings Section */}
+                <View style={[styles.sectionContainer, { backgroundColor: theme.colors.background }]}>
+                    <Text style={[styles.sectionHeaderTitle, { color: theme.colors.textSecondary }]}>SETTINGS</Text>
+
+                    {/* Theme Selector as Menu Items */}
+                    <TouchableOpacity
+                        style={[styles.menuItem, { borderBottomColor: theme.colors.border }]}
+                        onPress={() => {
+                            const nextMode = themeMode === 'light' ? 'dark' : themeMode === 'dark' ? 'auto' : 'light';
+                            setThemeMode(nextMode);
+                        }}
+                    >
+                        <View style={[styles.menuIconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#F5F5F5' }]}>
+                            {themeMode === 'light' ? <Sun size={20} color={theme.colors.text} /> :
+                                themeMode === 'dark' ? <Moon size={20} color={theme.colors.text} /> :
+                                    <Monitor size={20} color={theme.colors.text} />}
+                        </View>
+                        <View style={styles.menuTextContainer}>
+                            <Text style={[styles.menuTitle, { color: theme.colors.text }]}>Appearance</Text>
+                            <Text style={[styles.menuSubtitle, { color: theme.colors.textSecondary }]}>
+                                {themeMode.charAt(0).toUpperCase() + themeMode.slice(1)} Mode
+                            </Text>
+                        </View>
+                        <ChevronRight size={20} color={theme.colors.textSecondary} />
+                    </TouchableOpacity>
+
+                    <MenuLink
+                        title="App Settings"
+                        icon={Settings}
+                        onPress={() => { }}
+                    />
                 </View>
 
                 {/* Logout Button */}
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutText}>Logout</Text>
-                </TouchableOpacity>
+                <View style={[styles.sectionContainer, { backgroundColor: theme.colors.background, marginBottom: 40 }]}>
+                    <TouchableOpacity style={styles.logoutRow} onPress={handleLogout}>
+                        <LogOut size={20} color={theme.colors.error} />
+                        <Text style={[styles.logoutText, { color: theme.colors.error }]}>Log Out</Text>
+                    </TouchableOpacity>
+                    <Text style={[styles.versionText, { color: theme.colors.textSecondary }]}>Version 1.0.0</Text>
+                </View>
 
-                <View style={{ height: 40 }} />
             </ScrollView>
         </View>
     );
@@ -345,12 +268,11 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F8F8F8', // Will be dynamic
     },
     scrollView: {
         flex: 1,
     },
-    // Guest Mode Styles
+    // Guest Styles
     guestContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -360,46 +282,34 @@ const styles = StyleSheet.create({
     guestContent: {
         alignItems: 'center',
         width: '100%',
-        maxWidth: 400,
     },
     guestIconContainer: {
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: '#F5F0E8',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
     },
-    guestIcon: {
-        fontSize: 48,
-    },
     guestTitle: {
-        fontSize: 24,
+        fontSize: 20,
         fontFamily: Fonts.bold,
-        color: '#1a1a1a',
-        marginBottom: 12,
+        marginBottom: 8,
         textAlign: 'center',
     },
     guestSubtitle: {
-        fontSize: 15,
+        fontSize: 14,
         fontFamily: Fonts.regular,
-        color: '#666',
         textAlign: 'center',
         marginBottom: 32,
-        lineHeight: 22,
+        lineHeight: 20,
+        paddingHorizontal: 20,
     },
     modernLoginButton: {
         width: '100%',
-        height: 56,
-        borderRadius: 28,
+        height: 50,
+        borderRadius: 8,
         overflow: 'hidden',
-        marginBottom: 40,
-        shadowColor: '#D4AF37',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-        elevation: 8,
     },
     gradientButton: {
         flex: 1,
@@ -409,290 +319,113 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     modernLoginButtonText: {
-        color: '#1a1a1a',
+        color: '#FFF',
         fontFamily: Fonts.bold,
-        fontSize: 17,
-        letterSpacing: 0.8,
-    },
-    loginArrow: {
-        color: '#1a1a1a',
-        fontSize: 20,
-        fontFamily: Fonts.bold,
-    },
-    guestFeatures: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        width: '100%',
-    },
-    featureItem: {
-        alignItems: 'center',
-    },
-    featureIcon: {
-        fontSize: 32,
-        marginBottom: 8,
-    },
-    featureText: {
-        fontSize: 13,
-        fontFamily: Fonts.medium,
-        color: '#666',
-    },
-    guestThemeSection: {
-        marginTop: 40,
-        width: '100%',
-    },
-    guestThemeTitle: {
         fontSize: 16,
-        fontFamily: Fonts.semiBold,
-        color: '#1a1a1a',
-        marginBottom: 12,
-        textAlign: 'center',
     },
+
     // Profile Styles
     profileHeader: {
-        backgroundColor: '#FFFFFF',
-        paddingTop: 32,
-        paddingBottom: 24,
+        paddingVertical: 24,
+        paddingHorizontal: 20,
+        marginBottom: 12,
+    },
+    profileInfoContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
     },
     avatarCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#D4AF37',
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
-        shadowColor: '#D4AF37',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
+        marginRight: 20,
     },
     avatarText: {
-        fontSize: 36,
+        fontSize: 28,
         fontFamily: Fonts.bold,
         color: '#FFF',
     },
+    userInfo: {
+        flex: 1,
+    },
     userName: {
-        fontSize: 22,
+        fontSize: 20,
         fontFamily: Fonts.bold,
-        color: '#1a1a1a',
         marginBottom: 4,
     },
     userEmail: {
         fontSize: 14,
         fontFamily: Fonts.regular,
-        color: '#666',
+        marginBottom: 8,
     },
-    statsGrid: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        paddingHorizontal: 16,
-        paddingVertical: 20,
-        backgroundColor: '#FFFFFF',
-        marginTop: 16,
-        marginHorizontal: 16,
-        borderRadius: 16,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
+    editProfileBtn: {
+        alignSelf: 'flex-start',
     },
-    statBox: {
-        alignItems: 'center',
+    editProfileText: {
+        fontSize: 14,
+        fontFamily: Fonts.medium,
     },
-    statValue: {
-        fontSize: 24,
-        fontFamily: Fonts.bold,
-        color: '#D4AF37',
-        marginBottom: 4,
+
+    // Section Styles
+    sectionContainer: {
+        marginBottom: 12,
+        paddingVertical: 8,
     },
-    statLabel: {
+    sectionHeaderTitle: {
         fontSize: 12,
-        fontFamily: Fonts.medium,
-        color: '#666',
-    },
-    section: {
-        marginTop: 24,
-        marginHorizontal: 16,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontFamily: Fonts.semiBold,
-        color: '#1a1a1a',
-        marginBottom: 12,
-    },
-    seeAllText: {
-        fontSize: 14,
-        fontFamily: Fonts.medium,
-        color: '#D4AF37',
-    },
-    actionsGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 12,
-    },
-    actionCard: {
-        width: (width - 44) / 2,
-        aspectRatio: 1.5,
-        borderRadius: 16,
-        padding: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-        elevation: 2,
-    },
-    actionIcon: {
-        fontSize: 36,
-        marginBottom: 12,
-    },
-    actionTitle: {
-        fontSize: 14,
-        fontFamily: Fonts.semiBold,
-        color: '#1a1a1a',
-        textAlign: 'center',
-    },
-    orderCard: {
-        flexDirection: 'row',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    orderIconBox: {
-        width: 48,
-        height: 48,
-        borderRadius: 12,
-        backgroundColor: '#F5F0E8',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 12,
-    },
-    orderIcon: {
-        fontSize: 24,
-    },
-    orderInfo: {
-        flex: 1,
-        justifyContent: 'center',
-    },
-    orderName: {
-        fontSize: 15,
-        fontFamily: Fonts.semiBold,
-        color: '#1a1a1a',
-        marginBottom: 4,
-    },
-    orderDate: {
-        fontSize: 13,
-        fontFamily: Fonts.regular,
-        color: '#666',
-    },
-    orderRight: {
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-    },
-    orderAmount: {
-        fontSize: 16,
         fontFamily: Fonts.bold,
-        color: '#1a1a1a',
-        marginBottom: 6,
+        letterSpacing: 1,
+        marginBottom: 8,
+        paddingHorizontal: 20,
+        marginTop: 8,
     },
-    statusBadge: {
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 8,
-        backgroundColor: '#FFF3E0',
-    },
-    statusDelivered: {
-        backgroundColor: '#E8F5E9',
-    },
-    statusText: {
-        fontSize: 11,
-        fontFamily: Fonts.semiBold,
-        color: '#F57C00',
-        textTransform: 'capitalize',
-    },
-    logoutButton: {
-        marginHorizontal: 16,
-        marginTop: 32,
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        padding: 16,
+    menuItem: {
+        flexDirection: 'row',
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#FF3B30',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 1,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    menuIconContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 16,
+    },
+    menuTextContainer: {
+        flex: 1,
+    },
+    menuTitle: {
+        fontSize: 16,
+        fontFamily: Fonts.medium,
+        marginBottom: 2,
+    },
+    menuSubtitle: {
+        fontSize: 12,
+        fontFamily: Fonts.regular,
+    },
+
+    // Logout
+    logoutRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        gap: 8,
     },
     logoutText: {
         fontSize: 16,
-        fontFamily: Fonts.semiBold,
-        color: '#FF3B30',
+        fontFamily: Fonts.medium,
     },
-    themeSelector: {
-        flexDirection: 'row',
-        backgroundColor: '#F5F5F5',
-        padding: 4,
-        borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 8,
-        elevation: 2,
-    },
-    themeOption: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        borderRadius: 10,
-        backgroundColor: 'transparent',
-        gap: 6,
-    },
-    themeOptionActive: {
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#D4AF37',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    themeIcon: {
-        fontSize: 18,
-    },
-    themeText: {
+    versionText: {
+        textAlign: 'center',
         fontSize: 12,
-        fontFamily: Fonts.semiBold,
-        color: '#666',
-    },
-    themeTextActive: {
-        color: '#D4AF37',
-        fontFamily: Fonts.semiBold,
+        fontFamily: Fonts.regular,
+        marginTop: 8,
+        marginBottom: 16,
     },
 });

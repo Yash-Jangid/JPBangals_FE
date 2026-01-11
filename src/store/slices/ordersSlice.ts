@@ -57,7 +57,7 @@ export const fetchOrders = createAsyncThunk(
     async ({ page, limit }: { page: number; limit: number }, { rejectWithValue }) => {
         try {
             const response = await ordersApi.getOrders(page, limit);
-            return response.data;
+            return response;
         } catch (error: any) {
             return rejectWithValue(error.message || 'Failed to fetch orders');
         }
@@ -116,8 +116,18 @@ const ordersSlice = createSlice({
             })
             .addCase(fetchOrders.fulfilled, (state, action) => {
                 state.loading.list = false;
-                state.orders = action.payload.data;
-                state.meta = action.payload.meta;
+                state.loading.list = false;
+                // Backend returns data: [] directly, or data: { data: [], meta: ... }
+                // Based on logs, it seems to be data: [] directly in the response body's data property
+                // However, action.payload IS the response body.
+                // If action.payload.data is the array, use it.
+                // If action.payload.data.data exists (wrapper), use that.
+                const ordersData = Array.isArray(action.payload.data)
+                    ? action.payload.data
+                    : action.payload.data?.data || [];
+
+                state.orders = ordersData;
+                state.meta = (action.payload as any).meta || action.payload.data?.meta || null;
             })
             .addCase(fetchOrders.rejected, (state, action) => {
                 state.loading.list = false;

@@ -84,6 +84,11 @@ apiClient.interceptors.response.use(
 
         // Handle 401 Unauthorized - Token expired
         if (error.response?.status === HTTP_STATUS.UNAUTHORIZED && !originalRequest._retry) {
+            // Ignore 401 on logout - just let it fail so we can clear local state
+            if (originalRequest.url?.includes(API_CONFIG.ENDPOINTS.AUTH.LOGOUT)) {
+                return Promise.reject(error);
+            }
+
             if (isRefreshing) {
                 // If already refreshing, queue this request
                 return new Promise((resolve, reject) => {
