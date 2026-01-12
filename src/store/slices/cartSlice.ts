@@ -7,6 +7,7 @@ export interface CartState {
     totalAmount: number;
     totalItems: number;
     discountAmount: number;
+    couponCode: string | null;
     shippingAmount: number;
     finalAmount: number;
     loading: boolean;
@@ -24,6 +25,7 @@ const initialState: CartState = {
     totalAmount: 0,
     totalItems: 0,
     discountAmount: 0,
+    couponCode: null,
     shippingAmount: 0,
     finalAmount: 0,
     loading: false,
@@ -97,8 +99,9 @@ const hydrateCartItems = async (cartData: any) => {
             totalAmount,
             totalItems,
             discountAmount: cartData?.discountAmount || 0,
+            couponCode: cartData?.couponCode || null,
             shippingAmount: cartData?.shippingAmount || 0,
-            finalAmount: totalAmount
+            finalAmount: cartData?.finalAmount || totalAmount
         };
 
     } catch (error) {
@@ -181,6 +184,32 @@ export const clearCart = createAsyncThunk(
     }
 );
 
+export const applyCoupon = createAsyncThunk(
+    'cart/applyCoupon',
+    async (code: string, { dispatch, rejectWithValue }) => {
+        try {
+            await cartApi.applyCoupon(code);
+            await dispatch(fetchCart());
+            return;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to apply coupon');
+        }
+    }
+);
+
+export const removeCoupon = createAsyncThunk(
+    'cart/removeCoupon',
+    async (_, { dispatch, rejectWithValue }) => {
+        try {
+            await cartApi.removeCoupon();
+            await dispatch(fetchCart());
+            return;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to remove coupon');
+        }
+    }
+);
+
 const cartSlice = createSlice({
     name: 'cart',
     initialState,
@@ -202,6 +231,7 @@ const cartSlice = createSlice({
                 state.totalAmount = action.payload.totalAmount;
                 state.totalItems = action.payload.totalItems;
                 state.discountAmount = action.payload.discountAmount;
+                state.couponCode = action.payload.couponCode;
                 state.shippingAmount = action.payload.shippingAmount;
                 state.finalAmount = action.payload.finalAmount;
             })
@@ -295,12 +325,36 @@ const cartSlice = createSlice({
                 state.actionLoading.clear = true;
                 state.error = null;
             })
-            .addCase(clearCart.fulfilled, (state) => {
-                state.actionLoading.clear = false;
-                // State update handled by fetchCart
-            })
             .addCase(clearCart.rejected, (state, action) => {
                 state.actionLoading.clear = false;
+                state.error = action.payload as string;
+            });
+
+        // Apply Coupon
+        builder
+            .addCase(applyCoupon.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(applyCoupon.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(applyCoupon.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
+
+        // Remove Coupon
+        builder
+            .addCase(removeCoupon.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(removeCoupon.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(removeCoupon.rejected, (state, action) => {
+                state.loading = false;
                 state.error = action.payload as string;
             });
     },

@@ -102,3 +102,32 @@ export const clearCart = async (): Promise<BackendResponse<{ success: boolean }>
     throw new Error(handleApiError(error));
   }
 };
+
+/**
+ * Apply Coupon
+ */
+export const applyCoupon = async (code: string): Promise<BackendResponse<CartSummary>> => {
+  try {
+    const response = await apiClient.post<BackendResponse<CartSummary>>(
+      'cart/coupon',
+      { code }
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};
+
+/**
+ * Remove Coupon
+ */
+export const removeCoupon = async (): Promise<BackendResponse<CartSummary>> => {
+  try {
+    const response = await apiClient.delete<BackendResponse<CartSummary>>(
+      'cart/coupon'
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};

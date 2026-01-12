@@ -8,14 +8,17 @@ import {
   FlatList,
   Animated,
   Dimensions,
+  TextInput,
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { CustomHeader } from '../components/CustomHeader';
 import { colors } from '../theme/colors';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchCart, updateCartItem, removeFromCart } from '../store/slices/cartSlice';
+import { fetchCart, updateCartItem, removeFromCart, applyCoupon, removeCoupon } from '../store/slices/cartSlice';
 import { useTheme } from '../theme/ThemeContext';
-import { Trash2, Minus, Plus, ShoppingCart, ArrowRight } from 'lucide-react-native';
+import { Trash2, Minus, Plus, ShoppingCart, ArrowRight, Tag, X } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -49,10 +52,6 @@ const CartItemRow = React.memo(({ item, index, onUpdateQuantity, onRemove }: { i
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync local state if remote state changes (e.g. initial load or external update)
-  // We only sync if there is a significant difference or if we are not currently debouncing?
-  // Actually, simple sync is safer, but might jitter if conflicting with local.
-  // Given optimistic updates in slice, this should be fine.
   useEffect(() => {
     if (item.quantity !== localQuantity && !debounceTimer.current) {
       setLocalQuantity(item.quantity);
@@ -127,12 +126,20 @@ const CartItemRow = React.memo(({ item, index, onUpdateQuantity, onRemove }: { i
 export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
-  const { items, totalAmount, loading, actionLoading } = useAppSelector((state) => state.cart);
+  const { items, totalAmount, discountAmount, couponCode, finalAmount, loading, error } = useAppSelector((state) => state.cart);
+  const [couponInput, setCouponInput] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   useEffect(() => {
-    // console.log('🛒 CartScreen Mounted. Loading:', loading);
     dispatch(fetchCart());
   }, [dispatch]);
+
+  // Handle global error toast/alert if needed, unrelated to specific interactions
+  useEffect(() => {
+    if (error && error.includes('coupon')) {
+      Alert.alert('Coupon Error', error);
+    }
+  }, [error]);
 
   const handleUpdateQuantity = useCallback((id: string, newQuantity: number) => {
     dispatch(updateCartItem({ id, payload: { quantity: newQuantity } }));
@@ -142,8 +149,37 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     dispatch(removeFromCart(id));
   }, [dispatch]);
 
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) {
+      Alert.alert('Error', 'Please enter a coupon code');
+      return;
+    }
+    setIsApplyingCoupon(true);
+    try {
+      await dispatch(applyCoupon(couponInput.trim())).unwrap();
+      Alert.alert('Success', 'Coupon applied successfully!');
+      setCouponInput('');
+    } catch (err: any) {
+      Alert.alert('Error', err || 'Failed to apply coupon');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = async () => {
+    setIsApplyingCoupon(true);
+    try {
+      await dispatch(removeCoupon()).unwrap();
+      Alert.alert('Success', 'Coupon removed');
+    } catch (err: any) {
+      Alert.alert('Error', err || 'Failed to remove coupon');
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
   const handleCheckout = () => {
-    navigation.navigate('Checkout'); // Ensure this route exists or use Main navigator pattern if needed
+    navigation.navigate('Checkout');
   };
 
   const renderEmptyCart = () => (
@@ -182,11 +218,6 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     );
   }
 
-  // Use values from backend response
-  const subtotal = totalAmount;
-  const shipping = 0; // Free shipping logic can be enhanced
-  const total = subtotal + shipping;
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <CustomHeader title="Shopping Cart" />
@@ -205,24 +236,80 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={
-          <View style={styles.summarySection}>
-            <Text style={styles.summaryTitle}>Bill Details</Text>
+          <View>
+            {/* Coupon Section */}
+            <View style={styles.couponSection}>
+              <View style={styles.couponHeader}>
+                <Tag size={20} color={colors.primary.main} />
+                <Text style={styles.couponTitle}>Have a Coupon?</Text>
+              </View>
 
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Item Total</Text>
-              <Text style={styles.summaryValue}>₹{subtotal}</Text>
+              {couponCode ? (
+                <View style={styles.appliedCouponContainer}>
+                  <View style={styles.appliedCouponInfo}>
+                    <Text style={styles.appliedCouponCode}>{couponCode}</Text>
+                    <Text style={styles.appliedCouponSuccess}>Applied successfully!</Text>
+                  </View>
+                  <TouchableOpacity onPress={handleRemoveCoupon} disabled={isApplyingCoupon}>
+                    {isApplyingCoupon ? (
+                      <ActivityIndicator size="small" color={colors.semantic.error} />
+                    ) : (
+                      <X size={20} color={colors.semantic.error} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.couponInputContainer}>
+                  <TextInput
+                    style={styles.couponInput}
+                    placeholder="Enter Code"
+                    value={couponInput}
+                    onChangeText={setCouponInput}
+                    autoCapitalize="characters"
+                    placeholderTextColor={colors.text.disabled}
+                  />
+                  <TouchableOpacity
+                    style={[styles.applyButton, !couponInput.trim() && styles.applyButtonDisabled]}
+                    onPress={handleApplyCoupon}
+                    disabled={!couponInput.trim() || isApplyingCoupon}
+                  >
+                    {isApplyingCoupon ? (
+                      <ActivityIndicator size="small" color={colors.neutral.white} />
+                    ) : (
+                      <Text style={styles.applyButtonText}>Apply</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Shipping Fee</Text>
-              <Text style={styles.summaryValueFree}>FREE</Text>
-            </View>
+            {/* Bill Details */}
+            <View style={styles.summarySection}>
+              <Text style={styles.summaryTitle}>Bill Details</Text>
 
-            <View style={styles.divider} />
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Item Total</Text>
+                <Text style={styles.summaryValue}>₹{totalAmount}</Text>
+              </View>
 
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>To Pay</Text>
-              <Text style={styles.totalValue}>₹{total}</Text>
+              {discountAmount > 0 && (
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabelDiscount}>Coupon Discount</Text>
+                  <Text style={styles.summaryValueDiscount}>- ₹{discountAmount}</Text>
+                </View>
+              )}
+
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Shipping Fee</Text>
+                <Text style={styles.summaryValueFree}>FREE</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.summaryRow}>
+                <Text style={styles.totalLabel}>To Pay</Text>
+                <Text style={styles.totalValue}>₹{finalAmount}</Text>
+              </View>
             </View>
           </View>
         }
@@ -231,7 +318,7 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       <View style={styles.bottomActions}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabelSmall}>Total</Text>
-          <Text style={styles.totalValueSmall}>₹{total}</Text>
+          <Text style={styles.totalValueSmall}>₹{finalAmount}</Text>
         </View>
         <TouchableOpacity
           style={styles.checkoutButton}
@@ -354,12 +441,93 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  // Coupon Section
+  couponSection: {
+    backgroundColor: colors.neutral.white,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 8,
+    elevation: 2,
+    shadowColor: colors.neutral.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+  },
+  couponHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  couponTitle: {
+    fontSize: 16,
+    fontFamily: Fonts.semiBold,
+    color: colors.text.primary,
+    marginLeft: 8,
+  },
+  couponInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  couponInput: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    color: colors.text.primary,
+    marginRight: 12,
+    textTransform: 'uppercase',
+  },
+  applyButton: {
+    height: 48,
+    paddingHorizontal: 24,
+    backgroundColor: colors.primary.main,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  applyButtonDisabled: {
+    backgroundColor: colors.neutral.gray300,
+  },
+  applyButtonText: {
+    fontSize: 14,
+    fontFamily: Fonts.semiBold,
+    color: colors.neutral.white,
+  },
+  appliedCouponContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.semantic.success + '10', // 10% opacity
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.semantic.success + '40',
+  },
+  appliedCouponInfo: {
+    flex: 1,
+  },
+  appliedCouponCode: {
+    fontSize: 14,
+    fontFamily: Fonts.bold,
+    color: colors.semantic.success,
+  },
+  appliedCouponSuccess: {
+    fontSize: 12,
+    fontFamily: Fonts.regular,
+    color: colors.semantic.success,
+    marginTop: 2,
+  },
+
   // Summary
   summarySection: {
     backgroundColor: colors.neutral.white,
     borderRadius: 16,
     padding: 20,
-    marginTop: 8,
+    marginTop: 16,  // Increased spacing
     elevation: 2,
     shadowColor: colors.neutral.black,
     shadowOffset: { width: 0, height: 2 },
@@ -382,10 +550,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.regular,
     color: colors.text.secondary,
   },
+  summaryLabelDiscount: {
+    fontSize: 14,
+    fontFamily: Fonts.medium,
+    color: colors.semantic.success,
+  },
   summaryValue: {
     fontSize: 14,
     fontFamily: Fonts.medium,
     color: colors.text.primary,
+  },
+  summaryValueDiscount: {
+    fontSize: 14,
+    fontFamily: Fonts.bold,
+    color: colors.semantic.success,
   },
   summaryValueFree: {
     fontSize: 14,

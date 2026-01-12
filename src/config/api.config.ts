@@ -1,5 +1,6 @@
 export const API_CONFIG = {
     BASE_URL: 'https://bangles-jaipur-backend.onrender.com',
+    // BASE_URL: 'http://localhost:3000',
 
     // API Version
     VERSION: 'v1',
