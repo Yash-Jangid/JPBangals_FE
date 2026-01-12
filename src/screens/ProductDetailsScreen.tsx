@@ -89,7 +89,7 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
         quantity,
         size: selectedSize
       })).unwrap();
-      navigation.navigate('Cart');
+      navigation.navigate('Main', { screen: 'Cart' });
     } catch (err) {
       Alert.alert('Error', typeof err === 'string' ? err : 'Failed to add to cart');
     }

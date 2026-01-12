@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
 import { API_CONFIG, getApiUrl, HTTP_STATUS } from '../config/api.config';
-import { getAccessToken, getRefreshToken, saveAccessToken, clearAuthData } from '../utils/storage';
+import { getAccessToken, getRefreshToken, saveAccessToken, saveRefreshToken, clearAuthData } from '../utils/storage';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -107,27 +107,26 @@ apiClient.interceptors.response.use(
 
             originalRequest._retry = true;
             isRefreshing = true;
-
             try {
                 const refreshToken = await getRefreshToken();
 
                 if (!refreshToken) {
-                    // No refresh token, logout user
-                    await clearAuthData();
-                    processQueue(new Error('No refresh token available'), null);
-                    return Promise.reject(error);
+                    throw new Error('No refresh token available');
                 }
 
-                // Call refresh token endpoint
                 const response = await axios.post(
                     getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REFRESH),
                     { refreshToken }
                 );
 
-                const { accessToken } = response.data;
+                const { accessToken, refreshToken: newRefreshToken } = response.data.data;
 
                 // Save new access token
                 await saveAccessToken(accessToken);
+                // Save new refresh token (Backend implements rotation)
+                if (newRefreshToken) {
+                    await saveRefreshToken(newRefreshToken);
+                }
 
                 // Update authorization header
                 if (originalRequest.headers) {

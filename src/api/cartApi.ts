@@ -4,7 +4,7 @@ import { BackendResponse } from './authApi';
 import { Product } from './productsApi';
 
 export interface CartItem {
-  id: number;
+  id: string; // Changed from number to string to match UUIDs
   productId: string;
   quantity: number;
   size: string;

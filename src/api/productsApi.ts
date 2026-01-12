@@ -101,6 +101,20 @@ export const getProductBySlug = async (slug: string): Promise<BackendResponse<Pr
 };
 
 /**
+ * Get product by ID
+ */
+export const getProductById = async (id: string): Promise<BackendResponse<Product>> => {
+  try {
+    const response = await apiClient.get<BackendResponse<Product>>(
+      `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}/products/${id}`
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(handleApiError(error));
+  }
+};
+
+/**
  * Get featured products
  */
 export const getFeaturedProducts = async (limit: number = 10): Promise<BackendResponse<ProductsListResponse>> => {
