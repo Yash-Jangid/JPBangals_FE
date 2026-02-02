@@ -1,10 +1,10 @@
 {
-  "name": "EduriseApp",
-  "displayName": "EduriseApp",
+  "name": "JbangalsApp",
+  "displayName": "JbangalsApp",
   "android": {
-    "package": "com.eduriseapp"
+    "package": "com.jbangalsapp"
   },
   "ios": {
-    "bundleIdentifier": "com.eduriseapp"
+    "bundleIdentifier": "com.jbangalsapp"
   }
 }

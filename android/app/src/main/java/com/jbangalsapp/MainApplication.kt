@@ -1,4 +1,4 @@
-package com.eduriseapp
+package com.jbangalsapp
 
 import android.app.Application
 import com.facebook.react.PackageList

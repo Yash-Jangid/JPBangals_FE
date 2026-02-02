@@ -174,7 +174,7 @@ class SocialLoginService {
         errorMessage = 'Google Play Services not available';
       } else if (error.code === '10' || error.message?.includes('DEVELOPER_ERROR')) {
         errorMessage =
-          `Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint: 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25\n2. Package name: com.eduriseapp\n3. Client ID: 847613477366-p6dc3f3v03p008e2o74imemjvfumq9em.apps.googleusercontent.com\n\nGo to Google Console → APIs & Services → Credentials → Your OAuth 2.0 Client ID → Add SHA-1 fingerprint`;
+          `Google Sign-In configuration error. Please check:\n1. SHA-1 fingerprint: 5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25\n2. Package name: com.Jbangalsapp\n3. Client ID: 847613477366-p6dc3f3v03p008e2o74imemjvfumq9em.apps.googleusercontent.com\n\nGo to Google Console → APIs & Services → Credentials → Your OAuth 2.0 Client ID → Add SHA-1 fingerprint`;
       } else if (error.message) {
         errorMessage = error.message;
       }
