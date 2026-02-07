@@ -22,7 +22,7 @@ import {
   selectWishlistItems,
   fetchWishlist
 } from '../store/slices/wishlistSlice';
-import { CustomToast, ToastType } from '../components/CustomToast';
+import { WishlistToast } from '../components/WishlistToast';
 
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
@@ -42,11 +42,9 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<ToastType>('default');
 
-  const showToast = (message: string, type: ToastType = 'default') => {
+  const showToast = (message: string) => {
     setToastMessage(message);
-    setToastType(type);
     setToastVisible(true);
   };
 
@@ -76,13 +74,13 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
     try {
       if (wishlistSet.has(productId)) {
         await dispatch(removeFromWishlist(productId)).unwrap();
-        showToast('Removed from wishlist', 'info');
+        showToast('Removed from wishlist');
       } else {
         await dispatch(addToWishlist(productId)).unwrap();
-        showToast('Added to wishlist', 'success');
+        showToast('Added to wishlist');
       }
     } catch (error) {
-      showToast('Action failed', 'error');
+      showToast('Action failed');
     }
   };
 
@@ -212,11 +210,14 @@ export const CollectionsScreen: React.FC<{ navigation: any; route: any }> = ({ n
         />
       )}
 
-      <CustomToast
+      <WishlistToast
         visible={toastVisible}
         message={toastMessage}
-        type={toastType}
-        onDismiss={() => setToastVisible(false)}
+        onClose={() => setToastVisible(false)}
+        onView={() => {
+          setToastVisible(false);
+          navigation.navigate('Main', { screen: 'Wishlist' });
+        }}
       />
     </View>
   );

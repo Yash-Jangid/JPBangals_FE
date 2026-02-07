@@ -23,7 +23,7 @@ import { fetchBanners } from '../store/slices/bannersSlice';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../types/navigation';
 import { getPageConfig } from '../api/pagesApi';
-import { CustomToast, ToastType } from '../components/CustomToast';
+import { WishlistToast } from '../components/WishlistToast';
 import { Product } from '../types/product';
 
 const { width } = Dimensions.get('window');
@@ -92,13 +92,9 @@ export const HomeScreen: React.FC<{ navigation: HomeScreenNavigationProp }> = ({
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastAction, setToastAction] = useState<{ label: string; onPress: () => void } | undefined>(undefined);
-  const [toastType, setToastType] = useState<ToastType>('default');
 
-  const showToast = (message: string, type: ToastType = 'default', action?: { label: string; onPress: () => void }) => {
+  const showToast = (message: string) => {
     setToastMessage(message);
-    setToastType(type);
-    setToastAction(action);
     setToastVisible(true);
   };
 
@@ -110,13 +106,10 @@ export const HomeScreen: React.FC<{ navigation: HomeScreenNavigationProp }> = ({
         size: product.specifications?.size || 'Free Size'
       })).unwrap();
 
-      showToast('Added to bag', 'success', {
-        label: 'VIEW BAG',
-        onPress: () => navigation.navigate('Cart')
-      });
+      showToast('Added to bag');
     } catch (error) {
       console.error('Failed to add to cart:', error);
-      showToast('Failed to add to bag', 'error');
+      showToast('Failed to add to bag');
     }
   };
 
@@ -124,13 +117,10 @@ export const HomeScreen: React.FC<{ navigation: HomeScreenNavigationProp }> = ({
     const isWishlisted = wishlistSet.has(product.id);
     if (isWishlisted) {
       await dispatch(removeFromWishlist(product.id));
-      showToast('Removed from wishlist', 'info');
+      showToast('Removed from wishlist');
     } else {
       await dispatch(addToWishlist(product.id));
-      showToast('Added to wishlist', 'success', {
-        label: 'VIEW',
-        onPress: () => navigation.navigate('Wishlist' as any) // Assuming Wishlist route exists or reuse Collections
-      });
+      showToast('Added to wishlist');
     }
   };
 
@@ -383,16 +373,14 @@ export const HomeScreen: React.FC<{ navigation: HomeScreenNavigationProp }> = ({
         {renderFeaturedProducts()}
       </ScrollView>
 
-      <CustomToast
+      <WishlistToast
         visible={toastVisible}
         message={toastMessage}
-        type={toastType}
-        actionLabel={toastAction?.label}
-        onAction={() => {
-          toastAction?.onPress();
+        onClose={() => setToastVisible(false)}
+        onView={() => {
           setToastVisible(false);
+          navigation.navigate('Main', { screen: 'Wishlist' });
         }}
-        onDismiss={() => setToastVisible(false)}
       />
     </View>
   );

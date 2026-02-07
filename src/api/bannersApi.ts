@@ -19,6 +19,7 @@ export interface Banner {
  * Get all active banners (Public endpoint)
  */
 export const getBanners = async (): Promise<BackendResponse<Banner[]>> => {
+    console.log('Fetching banners...', `${API_CONFIG.ENDPOINTS.BANNERS.LIST}`);
     try {
         const response = await apiClient.get<BackendResponse<Banner[]>>(
             `${API_CONFIG.ENDPOINTS.BANNERS.LIST}`

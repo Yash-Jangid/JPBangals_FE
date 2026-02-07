@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'https://bangles-jaipur-backend.onrender.com',
-    // BASE_URL: 'http://10.0.2.2:3000',
+    // BASE_URL: 'https://bangles-jaipur-backend.onrender.com',
+    BASE_URL: 'http://10.0.2.2:8000',  // Changed from 3000 to 8000 to match backend
 
     // API Version
     VERSION: 'v1',
@@ -72,6 +72,7 @@ export const API_CONFIG = {
 
 // Build full API URL
 export const getApiUrl = (endpoint: string): string => {
+    console.log('Building API URL...', `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}${endpoint}`);
     return `${API_CONFIG.BASE_URL}/api/${API_CONFIG.VERSION}${endpoint}`;
 };
 

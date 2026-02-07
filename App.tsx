@@ -13,13 +13,6 @@ import socialLoginService from './src/services/SocialLoginService';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { AuthListener } from './src/components/AuthListener';
 
-const LoadingScreen = () => (
-  <View style={styles.loadingContainer}>
-    <ActivityIndicator size="large" color={Colors.primary} />
-    <Text style={styles.loadingText}>Loading...</Text>
-  </View>
-);
-
 const App: React.FC = () => {
   useEffect(() => {
     // Initialize social login services when app starts
@@ -28,7 +21,7 @@ const App: React.FC = () => {
 
   return (
     <Provider store={store}>
-      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+      <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
           <AuthListener />
           <GestureHandlerRootView style={{ flex: 1 }}>

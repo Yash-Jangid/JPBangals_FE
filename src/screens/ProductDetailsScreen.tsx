@@ -21,7 +21,7 @@ import { addToCart } from '../store/slices/cartSlice';
 import { addToWishlist, removeFromWishlist, selectWishlistItems, fetchWishlist } from '../store/slices/wishlistSlice';
 import { useTheme } from '../theme/ThemeContext';
 import { Heart, Share2, Star, ShoppingBag, Truck, RotateCcw, ShieldCheck } from 'lucide-react-native';
-import { CustomToast, ToastType } from '../components/CustomToast';
+import { WishlistToast } from '../components/WishlistToast';
 
 const { width } = Dimensions.get('window');
 const ASPECT_RATIO = 1.25; // 4:5 or 3:4 for premium look
@@ -51,13 +51,9 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [toastAction, setToastAction] = useState<{ label: string; onPress: () => void } | undefined>(undefined);
-  const [toastType, setToastType] = useState<ToastType>('default');
 
-  const showToast = (message: string, type: ToastType = 'default', action?: { label: string; onPress: () => void }) => {
+  const showToast = (message: string) => {
     setToastMessage(message);
-    setToastType(type);
-    setToastAction(action);
     setToastVisible(true);
   };
 
@@ -77,16 +73,13 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
     try {
       if (isWishlisted) {
         await dispatch(removeFromWishlist(productId)).unwrap();
-        showToast('Removed from wishlist', 'info');
+        showToast('Removed from wishlist');
       } else {
         await dispatch(addToWishlist(productId)).unwrap();
-        showToast('Added to wishlist', 'success', {
-          label: 'VIEW',
-          onPress: () => navigation.navigate('Wishlist')
-        });
+        showToast('Added to wishlist');
       }
     } catch (err) {
-      showToast('Action failed', 'error');
+      showToast('Action failed');
     }
   };
 
@@ -112,12 +105,9 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
         size: selectedSize
       })).unwrap();
 
-      showToast('Added to bag', 'success', {
-        label: 'VIEW BAG',
-        onPress: () => navigation.navigate('Cart')
-      });
+      showToast('Added to bag');
     } catch (err) {
-      showToast('Failed to add to bag', 'error');
+      showToast('Failed to add to bag');
     }
   };
 
@@ -335,16 +325,14 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
         </TouchableOpacity>
       </View>
 
-      <CustomToast
+      <WishlistToast
         visible={toastVisible}
         message={toastMessage}
-        type={toastType}
-        actionLabel={toastAction?.label}
-        onAction={() => {
-          toastAction?.onPress();
+        onClose={() => setToastVisible(false)}
+        onView={() => {
           setToastVisible(false);
+          navigation.navigate('Main', { screen: 'Wishlist' });
         }}
-        onDismiss={() => setToastVisible(false)}
       />
     </View>
   );

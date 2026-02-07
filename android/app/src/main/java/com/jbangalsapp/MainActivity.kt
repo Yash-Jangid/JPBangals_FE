@@ -5,7 +5,16 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
+import android.os.Bundle
+
 class MainActivity : ReactActivity() {
+
+  override fun onCreate(savedInstanceState: Bundle?) {
+    android.util.Log.d("SplashScreen", "MainActivity: onCreate called. Switching theme now.")
+    setTheme(R.style.AppTheme)
+    super.onCreate(savedInstanceState)
+    android.util.Log.d("SplashScreen", "MainActivity: theme switched and super.onCreate called.")
+  }
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule

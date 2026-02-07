@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <!-- Shadow effect beneath the logo -->
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <size android:width="220dp" android:height="220dp" />
+            <gradient
+                android:type="radial"
+                android:gradientRadius="110dp"
+                android:centerColor="#40000000"
+                android:endColor="#00000000" />
+        </shape>
+    </item>
+    
+    <!-- App logo -->
+    <item
+        android:gravity="center"
+        android:drawable="@drawable/splash_logo" />
+</layer-list>

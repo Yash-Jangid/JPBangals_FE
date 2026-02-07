@@ -3,9 +3,12 @@ import apiService from '../../services/ApiService';
 import { storageService, saveAccessToken, saveRefreshToken, clearAuthData } from '../../utils/storage';
 import * as authApi from '../../api/authApi';
 export interface User {
+	id: number;
 	name: string;
 	email: string;
-	id: number;
+	firstName?: string;
+	lastName?: string;
+	phoneNumber?: string;
 	avatar?: string;
 	role?: string;
 }

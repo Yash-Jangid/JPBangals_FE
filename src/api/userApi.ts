@@ -50,3 +50,14 @@ export const updateUserProfile = async (data: Partial<UserProfile>): Promise<Bac
         throw new Error(handleApiError(error));
     }
 };
+
+/**
+ * Delete user account
+ */
+export const deleteAccount = async (): Promise<void> => {
+    try {
+        await apiClient.delete(API_CONFIG.ENDPOINTS.USERS.PROFILE);
+    } catch (error) {
+        throw new Error(handleApiError(error));
+    }
+};

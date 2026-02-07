@@ -28,6 +28,7 @@ import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import VerifyOTPScreen from '../screens/VerifyOTPScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import WishlistScreen from '../screens/WishlistScreen';
+import { EditProfileScreen } from '../screens/EditProfileScreen';
 import { OfflineScreen } from '../screens/OfflineScreen';
 import { ConnectivityManager } from '../components/ConnectivityManager';
 import { useAppDispatch } from '../store/hooks';
@@ -105,12 +106,12 @@ const MainTabNavigator = () => {
           />
         ) : (
           <Tab.Screen
-            name="Cart"
-            component={CartScreen}
+            name="Wishlist"
+            component={WishlistScreen}
             options={{
-              tabBarLabel: 'Cart',
+              tabBarLabel: 'Wishlist',
               tabBarIcon: ({ focused, color }) => (
-                <ShoppingCart size={24} color={color} fill={focused ? color : 'none'} />
+                <Heart size={24} color={color} fill={focused ? color : 'none'} />
               ),
             }}
           />
@@ -189,6 +190,7 @@ export const AppNavigator = () => {
 
           {/* Profile & Utility Screens */}
           <Stack.Screen name="Notifications" component={NotificationsScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
           <Stack.Screen name="WebView" component={WebViewScreen} />
         </Stack.Navigator>
       )}

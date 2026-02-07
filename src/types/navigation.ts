@@ -1,3 +1,5 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+
 export type RootStackParamList = {
   // Auth
   Login: undefined;
@@ -9,7 +11,7 @@ export type RootStackParamList = {
   ResetPassword: { email: string; otp: string };
 
   // Main Tab
-  Main: undefined;
+  Main: NavigatorScreenParams<TabParamList>;
 
   // Shop
   ProductDetails: { productId: string };
@@ -29,6 +31,7 @@ export type RootStackParamList = {
 
   // Profile
   Profile: undefined;
+  EditProfile: undefined;
   Notifications: undefined;
 
   // Legacy/Utility (Keep if needed for now, or remove if sure)

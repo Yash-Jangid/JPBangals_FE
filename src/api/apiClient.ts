@@ -164,7 +164,7 @@ const performTokenRefresh = async (): Promise<string | null> => {
                 throw new Error('NO_REFRESH');
             }
 
-            if (__DEV__) console.log('🔄 [Auth] Starting token refresh rotation...');
+            if (__DEV__) console.log('🔄 [Auth] Starting token refresh rotation...', API_CONFIG.ENDPOINTS);
 
             const response = await axios.post(
                 getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REFRESH),

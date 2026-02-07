@@ -163,10 +163,10 @@ export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) =>
                             <View style={[styles.line, { backgroundColor: theme.colors.border }]} />
                         </View>
 
-                        <TouchableOpacity style={[styles.socialButton, { borderColor: theme.colors.border }]}>
+                        {/* <TouchableOpacity style={[styles.socialButton, { borderColor: theme.colors.border }]}>
                             <GoogleIcon size={20} />
                             <Text style={[styles.socialButtonText, { color: theme.colors.textPrimary }]}>Google Account</Text>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     <View style={styles.footer}>
