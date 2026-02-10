@@ -17,9 +17,12 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { ChevronLeft, User, Phone, Check } from 'lucide-react-native';
 import { updateUserProfile } from '../api/userApi';
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const EditProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const { theme } = useTheme();
     const dispatch = useAppDispatch();
+    const { showAlert } = useAlert();
     const { user } = useAppSelector((state) => state.auth);
 
     const [firstName, setFirstName] = useState(user?.firstName || '');
@@ -29,7 +32,11 @@ export const EditProfileScreen: React.FC<{ navigation: any }> = ({ navigation })
 
     const handleSave = async () => {
         if (!firstName.trim() || !lastName.trim()) {
-            Alert.alert('Error', 'First and Last Name are required');
+            showAlert({
+                title: 'Error',
+                message: 'First and Last Name are required',
+                type: 'error'
+            });
             return;
         }
 
@@ -41,12 +48,20 @@ export const EditProfileScreen: React.FC<{ navigation: any }> = ({ navigation })
                 phoneNumber
             });
 
-            Alert.alert('Success', 'Profile updated successfully');
-            navigation.goBack();
+            showAlert({
+                title: 'Success',
+                message: 'Profile updated successfully',
+                type: 'success',
+                onDismiss: () => navigation.goBack()
+            });
         } catch (error: any) {
             console.error('Update Profile Error:', error);
             const errorMessage = error.message || 'Failed to update profile';
-            Alert.alert('Error', errorMessage);
+            showAlert({
+                title: 'Error',
+                message: errorMessage,
+                type: 'error'
+            });
         } finally {
             setLoading(false);
         }

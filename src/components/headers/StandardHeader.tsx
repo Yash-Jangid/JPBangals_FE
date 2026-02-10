@@ -11,7 +11,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, ShoppingCart, User } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Images } from '../../common/images';
-
 interface StandardHeaderProps {
     onSearchPress?: () => void;
     onCartPress?: () => void;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { Colors } from '../common/colors';
+import { useTheme } from '../theme/ThemeContext';
 
 interface SkeletonProps {
   width?: number | string;
@@ -9,6 +9,7 @@ interface SkeletonProps {
 }
 
 const Skeleton: React.FC<SkeletonProps> = ({ width = '100%', height = 20, style }) => {
+  const { theme } = useTheme();
   const animatedValue = React.useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
@@ -41,7 +42,7 @@ const Skeleton: React.FC<SkeletonProps> = ({ width = '100%', height = 20, style 
         {
           width,
           height,
-          backgroundColor: Colors.border,
+          backgroundColor: theme.colors.border,
           borderRadius: 4,
           opacity,
         },
@@ -52,10 +53,12 @@ const Skeleton: React.FC<SkeletonProps> = ({ width = '100%', height = 20, style 
 };
 
 export const ProfileSkeleton: React.FC = () => {
+  const { theme } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Profile Header Skeleton */}
-      <View style={styles.profileHeader}>
+      <View style={[styles.profileHeader, { backgroundColor: theme.colors.primary }]}>
         <View style={styles.avatarContainer}>
           <Skeleton width={80} height={80} style={styles.avatarSkeleton} />
           <Skeleton width={24} height={24} style={styles.editButtonSkeleton} />
@@ -67,7 +70,7 @@ export const ProfileSkeleton: React.FC = () => {
       </View>
 
       {/* Account Balance Skeleton */}
-      <View style={styles.balanceCard}>
+      <View style={[styles.balanceCard, { backgroundColor: theme.colors.surface }]}>
         <View style={styles.balanceHeader}>
           <Skeleton width={40} height={40} style={styles.balanceIconSkeleton} />
           <View style={styles.balanceTextContainer}>
@@ -81,24 +84,24 @@ export const ProfileSkeleton: React.FC = () => {
       {/* Stats Skeleton */}
       <View style={styles.statsContainer}>
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <Skeleton width={40} height={40} style={styles.statIconSkeleton} />
             <Skeleton width={30} height={20} style={styles.statNumberSkeleton} />
             <Skeleton width={80} height={14} style={styles.statLabelSkeleton} />
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <Skeleton width={40} height={40} style={styles.statIconSkeleton} />
             <Skeleton width={30} height={20} style={styles.statNumberSkeleton} />
             <Skeleton width={80} height={14} style={styles.statLabelSkeleton} />
           </View>
         </View>
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <Skeleton width={40} height={40} style={styles.statIconSkeleton} />
             <Skeleton width={30} height={20} style={styles.statNumberSkeleton} />
             <Skeleton width={80} height={14} style={styles.statLabelSkeleton} />
           </View>
-          <View style={styles.statCard}>
+          <View style={[styles.statCard, { backgroundColor: theme.colors.surface }]}>
             <Skeleton width={40} height={40} style={styles.statIconSkeleton} />
             <Skeleton width={30} height={20} style={styles.statNumberSkeleton} />
             <Skeleton width={80} height={14} style={styles.statLabelSkeleton} />
@@ -113,7 +116,7 @@ export const ProfileSkeleton: React.FC = () => {
             <Skeleton width={120} height={18} style={styles.sectionTitleSkeleton} />
             <Skeleton width={60} height={16} style={styles.seeAllSkeleton} />
           </View>
-          <View style={styles.sectionContent}>
+          <View style={[styles.sectionContent, { backgroundColor: theme.colors.surface }]}>
             <Skeleton width="100%" height={60} style={styles.sectionItemSkeleton} />
             <Skeleton width="100%" height={60} style={styles.sectionItemSkeleton} />
           </View>
@@ -126,10 +129,8 @@ export const ProfileSkeleton: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   profileHeader: {
-    backgroundColor: Colors.primary,
     padding: 20,
     alignItems: 'center',
   },
@@ -164,7 +165,6 @@ const styles = StyleSheet.create({
   balanceCard: {
     margin: 16,
     padding: 16,
-    backgroundColor: Colors.cardBackground,
     borderRadius: 12,
   },
   balanceHeader: {
@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.cardBackground,
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -234,7 +233,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   sectionContent: {
-    backgroundColor: Colors.cardBackground,
     borderRadius: 12,
     padding: 16,
   },

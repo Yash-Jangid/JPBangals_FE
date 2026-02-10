@@ -98,6 +98,7 @@ export const refreshAccessToken = async (refreshToken: string): Promise<RefreshT
  * Logout user
  */
 export const logoutUser = async (): Promise<void> => {
+    console.log('Logging out...');
     try {
         await apiClient.post(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
     } catch (error) {

@@ -124,6 +124,7 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
 	try {
+		console.log('Logging out..authSlice.');
 		// Call backend logout endpoint
 		await authApi.logoutUser();
 
@@ -245,6 +246,7 @@ const authSlice = createSlice({
 			.addCase(logoutUser.fulfilled, (state) => {
 				state.loading = false;
 				state.isAuthenticated = false;
+				state.isGuestMode = false;
 				state.user = null;
 				state.token = null;
 				state.accessToken = null;

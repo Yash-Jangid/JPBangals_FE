@@ -1,35 +1,19 @@
-/**
- * Component Resolver
- * 
- * Maps component variant names to actual component implementations.
- * Dynamically resolves components based on active theme.
- */
-
-import React from 'react';
 import { ComponentType as ReactComponentType } from 'react';
 import { ComponentType, ComponentVariantMap } from '../registry/types';
-
-// Import all component variants
 import { StandardHeader, LegacyHeader, HeaderSkeleton, WhiteShineHeader } from '../../components/headers';
 import { ModernProfile, LegacyProfile, ProfileSkeleton } from '../../components/profiles';
 
-/**
- * Component Variant Map
- * Maps variant names to actual components
- */
+
 const COMPONENT_MAP = {
     Header: {
         Standard: StandardHeader,
         Legacy: LegacyHeader,
-        Minimal: StandardHeader, // Placeholder, create MinimalHeader if needed
+        Minimal: StandardHeader,
         WhiteShine: WhiteShineHeader,
     },
-    // Profile variants will be added in next step
     Profile: {
         Modern: ModernProfile,
         Legacy: LegacyProfile,
-        Card: ModernProfile,   // Placeholder, create CardProfile if needed
-        Compact: LegacyProfile, // Placeholder, create CompactProfile if needed
     },
     // Other component variants (placeholders for now)
     ProductCard: {

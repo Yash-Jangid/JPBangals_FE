@@ -219,7 +219,7 @@ const WishlistScreen: React.FC = () => {
                     title="MY WISHLIST"
                     onCartPress={() => navigation.navigate('Cart')}
                     onSearchPress={() => { }}
-                    onProfilePress={() => navigation.navigate('Profile')}
+
                 />
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -234,7 +234,7 @@ const WishlistScreen: React.FC = () => {
                 title="MY WISHLIST"
                 onCartPress={() => navigation.navigate('Cart')}
                 onSearchPress={() => { }}
-                onProfilePress={() => navigation.navigate('Profile')}
+
             />
 
             {/* Error Message */}

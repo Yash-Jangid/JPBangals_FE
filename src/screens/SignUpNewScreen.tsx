@@ -27,9 +27,12 @@ interface SignUpNewScreenProps {
     navigation: any;
 }
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const SignUpNewScreen: React.FC<SignUpNewScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const dispatch = useAppDispatch();
+    const { showAlert } = useAlert();
     const { loading, isAuthenticated, accessToken, error } = useAppSelector((state) => state.auth);
 
     const [fullName, setFullName] = useState('');
@@ -40,25 +43,27 @@ export const SignUpNewScreen: React.FC<SignUpNewScreenProps> = ({ navigation }) 
     const [localLoading, setLocalLoading] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated && accessToken) {
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Main' }],
-            });
-        }
         return () => {
             dispatch(clearError());
         };
-    }, [isAuthenticated, accessToken, navigation, dispatch]);
+    }, [dispatch]);
 
     const handleSignUp = async () => {
         if (!fullName.trim() || !email.trim() || !password.trim()) {
-            Alert.alert('Required', 'Please fill in all fields');
+            showAlert({
+                title: 'Required',
+                message: 'Please fill in all fields',
+                type: 'warning'
+            });
             return;
         }
 
         if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match');
+            showAlert({
+                title: 'Error',
+                message: 'Passwords do not match',
+                type: 'error'
+            });
             return;
         }
 
@@ -78,9 +83,19 @@ export const SignUpNewScreen: React.FC<SignUpNewScreenProps> = ({ navigation }) 
 
             if (registerUser.fulfilled.match(result)) {
                 // Success handled by useEffect redirection
+                showAlert({
+                    title: 'Registration Successful',
+                    message: 'Welcome to Jaipur Bangles! Redirecting you...',
+                    type: 'success'
+                });
             }
         } catch (err) {
             console.error('Signup Error:', err);
+            showAlert({
+                title: 'Error',
+                message: 'An unexpected error occurred. Please try again.',
+                type: 'error'
+            });
         } finally {
             setLocalLoading(false);
         }

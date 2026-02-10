@@ -17,13 +17,13 @@ import { SignUpNewScreen } from '../screens/SignUpNewScreen';
 import { HomeScreen } from '../screens/HomeScreen';
 import { CollectionsScreen } from '../screens/CollectionsScreen';
 import { CartScreen } from '../screens/CartScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
+import { ProfileScreen } from '../components/profiles/ProfileScreen';
 import { ProductDetailsScreen } from '../screens/ProductDetailsScreen';
 import { CheckoutScreen } from '../screens/CheckoutScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { OrderDetailsScreen } from '../screens/OrderDetailsScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import { WebViewScreen } from '../components/WebViewScreen';
+
+// import { WebViewScreen } from '../components/WebViewScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import VerifyOTPScreen from '../screens/VerifyOTPScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
@@ -165,33 +165,29 @@ export const AppNavigator = () => {
             headerShown: false,
             gestureEnabled: true,
           }}
-          initialRouteName={(isAuthenticated && (token || accessToken)) || isGuestMode ? "Main" : "LoginNew"}
         >
-          {/* Auth Screens */}
-          <Stack.Screen name="Login" component={LoginNewScreen} />
-          <Stack.Screen name="SignUp" component={SignUpNewScreen} />
-          <Stack.Screen name="LoginNew" component={LoginNewScreen} />
-          <Stack.Screen name="SignUpNew" component={SignUpNewScreen} />
-          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-          <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
-          <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
-
-          <Stack.Screen name="Cart" component={CartScreen} />
-          <Stack.Screen name="Wishlist" component={WishlistScreen} />
-
-          {/* Main App */}
-          <Stack.Screen name="Main" component={MainTabNavigator} />
-
-          {/* E-Commerce Screens */}
-          <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
-          <Stack.Screen name="Checkout" component={CheckoutScreen} />
-          <Stack.Screen name="Orders" component={OrdersScreen} />
-          <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
-
-          {/* Profile & Utility Screens */}
-          <Stack.Screen name="Notifications" component={NotificationsScreen} />
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          <Stack.Screen name="WebView" component={WebViewScreen} />
+          {((isAuthenticated && (token || accessToken)) || isGuestMode) ? (
+            <Stack.Group>
+              <Stack.Screen name="Main" component={MainTabNavigator} />
+              <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+              <Stack.Screen name="Checkout" component={CheckoutScreen} />
+              <Stack.Screen name="Orders" component={OrdersScreen} />
+              <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+              <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+              <Stack.Screen name="Cart" component={CartScreen} />
+              <Stack.Screen name="Wishlist" component={WishlistScreen} />
+            </Stack.Group>
+          ) : (
+            <Stack.Group screenOptions={{ animationTypeForReplace: 'pop' }}>
+              <Stack.Screen name="LoginNew" component={LoginNewScreen} />
+              <Stack.Screen name="SignUpNew" component={SignUpNewScreen} />
+              <Stack.Screen name="Login" component={LoginNewScreen} />
+              <Stack.Screen name="SignUp" component={SignUpNewScreen} />
+              <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+              <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
+              <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+            </Stack.Group>
+          )}
         </Stack.Navigator>
       )}
     </NavigationContainer>

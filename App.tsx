@@ -9,15 +9,16 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { Colors } from './src/common/colors';
 import { Fonts } from './src/common/fonts';
 import { store, persistor } from './src/store';
-import socialLoginService from './src/services/SocialLoginService';
+// import socialLoginService from './src/services/SocialLoginService';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { AuthListener } from './src/components/AuthListener';
+import { CustomAlertProvider } from './src/components/ui/CustomAlertProvider';
 
 const App: React.FC = () => {
-  useEffect(() => {
-    // Initialize social login services when app starts
-    socialLoginService.initializeAll();
-  }, []);
+  // useEffect(() => {
+  //   // Initialize social login services when app starts
+  //   socialLoginService.initializeAll();
+  // }, []);
 
   return (
     <Provider store={store}>
@@ -25,9 +26,11 @@ const App: React.FC = () => {
         <ThemeProvider>
           <AuthListener />
           <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaProvider>
-              <AppNavigator />
-            </SafeAreaProvider>
+            <CustomAlertProvider>
+              <SafeAreaProvider>
+                <AppNavigator />
+              </SafeAreaProvider>
+            </CustomAlertProvider>
           </GestureHandlerRootView>
         </ThemeProvider>
       </PersistGate>

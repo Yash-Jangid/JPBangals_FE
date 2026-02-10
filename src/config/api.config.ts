@@ -1,6 +1,7 @@
+import { API_BASE_URL } from './env.config';
+
 export const API_CONFIG = {
-    // BASE_URL: 'https://bangles-jaipur-backend.onrender.com',
-    BASE_URL: 'http://10.0.2.2:8000',  // Changed from 3000 to 8000 to match backend
+    BASE_URL: API_BASE_URL,
 
     // API Version
     VERSION: 'v1',
@@ -20,8 +21,6 @@ export const API_CONFIG = {
 
         // Users
         USERS: {
-            PROFILE: '/users/profile',
-            UPDATE_PROFILE: '/users/profile',
             ADDRESSES: '/users/addresses',
             BY_ID: (id: string) => `/users/${id}`,
         },

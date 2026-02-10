@@ -47,13 +47,13 @@ export const CustomHeader: React.FC<CustomHeaderProps> = ({
                 onPress={onBackPress}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <ChevronLeft size={28} color={theme.colors.text} />
+                <ChevronLeft size={28} color={theme.colors.textPrimary} />
               </TouchableOpacity>
             )}
           </View>
 
           <View style={styles.centerSection}>
-            <Text style={[styles.title, { color: theme.colors.text }]} numberOfLines={1}>
+            <Text style={[styles.title, { color: theme.colors.textPrimary }]} numberOfLines={1}>
               {title}
             </Text>
           </View>

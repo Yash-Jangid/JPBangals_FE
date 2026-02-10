@@ -89,9 +89,9 @@ export const ThemeHeader: React.FC<ThemeHeaderProps> = ({
                                     </View>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={onProfilePress} style={styles.iconButton}>
+                                {/* <TouchableOpacity onPress={onProfilePress} style={styles.iconButton}>
                                     <User size={22} color={theme.colors.textPrimary} />
-                                </TouchableOpacity>
+                                </TouchableOpacity> */}
                             </>
                         ) : (
                             // Legacy / Midnight Icons (Heart + User)

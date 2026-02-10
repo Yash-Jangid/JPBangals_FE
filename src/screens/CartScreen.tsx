@@ -123,9 +123,12 @@ const CartItemRow = React.memo(({ item, index, onUpdateQuantity, onRemove }: { i
   );
 });
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const { theme } = useTheme();
   const dispatch = useAppDispatch();
+  const { showAlert } = useAlert();
   const { items, totalAmount, discountAmount, couponCode, finalAmount, loading, error } = useAppSelector((state) => state.cart);
   const [couponInput, setCouponInput] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -137,30 +140,58 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   // Handle global error toast/alert if needed, unrelated to specific interactions
   useEffect(() => {
     if (error && error.includes('coupon')) {
-      Alert.alert('Coupon Error', error);
+      showAlert({
+        title: 'Coupon Error',
+        message: error,
+        type: 'error'
+      });
     }
-  }, [error]);
+  }, [error, showAlert]);
 
   const handleUpdateQuantity = useCallback((id: string, newQuantity: number) => {
     dispatch(updateCartItem({ id, payload: { quantity: newQuantity } }));
   }, [dispatch]);
 
   const handleRemoveItem = useCallback((id: string) => {
-    dispatch(removeFromCart(id));
-  }, [dispatch]);
+    showAlert({
+      title: 'Remove Item',
+      message: 'Are you sure you want to remove this item from your cart?',
+      type: 'warning',
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => dispatch(removeFromCart(id))
+        }
+      ]
+    });
+  }, [dispatch, showAlert]);
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) {
-      Alert.alert('Error', 'Please enter a coupon code');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter a coupon code',
+        type: 'error'
+      });
       return;
     }
     setIsApplyingCoupon(true);
     try {
       await dispatch(applyCoupon(couponInput.trim())).unwrap();
-      Alert.alert('Success', 'Coupon applied successfully!');
+      showAlert({
+        title: 'Success',
+        message: 'Coupon applied successfully!',
+        type: 'success'
+      });
       setCouponInput('');
     } catch (err: any) {
-      Alert.alert('Error', err || 'Failed to apply coupon');
+      showAlert({
+        title: 'Error',
+        message: err || 'Failed to apply coupon',
+        type: 'error'
+      });
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -170,9 +201,17 @@ export const CartScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     setIsApplyingCoupon(true);
     try {
       await dispatch(removeCoupon()).unwrap();
-      Alert.alert('Success', 'Coupon removed');
+      showAlert({
+        title: 'Success',
+        message: 'Coupon removed',
+        type: 'success'
+      });
     } catch (err: any) {
-      Alert.alert('Error', err || 'Failed to remove coupon');
+      showAlert({
+        title: 'Error',
+        message: err || 'Failed to remove coupon',
+        type: 'error'
+      });
     } finally {
       setIsApplyingCoupon(false);
     }

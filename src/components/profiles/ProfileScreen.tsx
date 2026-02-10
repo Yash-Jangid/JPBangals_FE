@@ -10,12 +10,14 @@ import {
     Switch,
     StatusBar,
 } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logoutUser } from '../store/slices/authSlice';
-import { fetchOrders } from '../store/slices/ordersSlice';
-import { deleteAccount } from '../api/userApi';
-import { useTheme } from '../theme/ThemeContext';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { logoutUser } from '../../store/slices/authSlice';
+import { fetchOrders } from '../../store/slices/ordersSlice';
+import { deleteAccount } from '../../api/userApi';
+import { useTheme } from '../../theme/ThemeContext';
+import { useAlert } from '../../components/ui/CustomAlertProvider';
 import {
     Package,
     Heart,
@@ -27,16 +29,18 @@ import {
     Moon,
     Trash2,
 } from 'lucide-react-native';
-
 export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const dispatch = useAppDispatch();
     const { user, isAuthenticated, isGuestMode } = useAppSelector((state) => state.auth);
-    const { theme, themeMode, setThemeMode } = useTheme();
+    const { theme, themeMode, setThemeMode, themeId, activeMode } = useTheme();
+    const { showAlert } = useAlert();
     const isDark = theme.isDark;
     const { orders } = useAppSelector((state) => state.orders);
     const [refreshing, setRefreshing] = useState(false);
+    const [appVersion, setAppVersion] = useState('');
 
     useEffect(() => {
+        setAppVersion(`${DeviceInfo.getVersion()} (${DeviceInfo.getBuildNumber()})`);
         if (isAuthenticated && !isGuestMode) {
             loadData();
         }
@@ -57,31 +61,30 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
     };
 
     const handleLogout = () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure you want to logout?',
-            [
+        console.log('Logging out ProfileScreen...');
+        showAlert({
+            title: 'Logout',
+            message: 'Are you sure you want to logout?',
+            type: 'warning',
+            buttons: [
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Logout',
                     style: 'destructive',
                     onPress: async () => {
                         await dispatch(logoutUser());
-                        navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'LoginNew' }], // Redirect to new login
-                        });
                     },
                 },
             ]
-        );
+        });
     };
 
     const handleDeleteAccount = () => {
-        Alert.alert(
-            'Delete Account',
-            'Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be deleted.',
-            [
+        showAlert({
+            title: 'Delete Account',
+            message: 'Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data will be deleted.',
+            type: 'error',
+            buttons: [
                 { text: 'Cancel', style: 'cancel' },
                 {
                     text: 'Delete',
@@ -90,18 +93,22 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                         try {
                             await deleteAccount();
                             await dispatch(logoutUser());
-                            navigation.reset({
-                                index: 0,
-                                routes: [{ name: 'LoginNew' }],
+                            showAlert({
+                                title: 'Account Deleted',
+                                message: 'Your account has been successfully deleted.',
+                                type: 'success'
                             });
-                            Alert.alert('Account Deleted', 'Your account has been successfully deleted.');
                         } catch (error) {
-                            Alert.alert('Error', 'Failed to delete account. Please try again.');
+                            showAlert({
+                                title: 'Error',
+                                message: 'Failed to delete account. Please try again.',
+                                type: 'error'
+                            });
                         }
                     },
                 },
             ]
-        );
+        });
     };
 
     const MenuItem = ({ title, icon: Icon, onPress, subtitle, showChevron = true, rightElement }: any) => (
@@ -110,12 +117,12 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
             onPress={onPress}
             activeOpacity={0.7}
         >
-            <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.surface }]}>
+            <View style={[styles.menuIconContainer, { backgroundColor: theme.colors.surfaceHighlight || theme.colors.surface }]}>
                 <Icon size={20} color={theme.colors.textSecondary} />
             </View>
             <View style={styles.menuTextContainer}>
-                <Text style={[styles.menuTitle, { color: theme.colors.textPrimary }]}>{title}</Text>
-                {subtitle && <Text style={[styles.menuSubtitle, { color: theme.colors.textSecondary }]}>{subtitle}</Text>}
+                <Text style={[styles.menuTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.body1.fontFamily }]}>{title}</Text>
+                {subtitle && <Text style={[styles.menuSubtitle, { color: theme.colors.textSecondary, fontFamily: theme.typography.caption.fontFamily }]}>{subtitle}</Text>}
             </View>
             {rightElement}
             {showChevron && !rightElement && <ChevronRight size={20} color={theme.colors.textSecondary} />}
@@ -130,16 +137,17 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     <View style={[styles.guestIconCircle, { backgroundColor: theme.colors.primary + '15' }]}>
                         <User size={64} color={theme.colors.primary} />
                     </View>
-                    <Text style={[styles.guestTitle, { color: theme.colors.textPrimary }]}>Welcome Guest</Text>
-                    <Text style={[styles.guestSubtitle, { color: theme.colors.textSecondary }]}>
+                    <Text style={[styles.guestTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h1.fontFamily }]}>Welcome Guest</Text>
+                    <Text style={[styles.guestSubtitle, { color: theme.colors.textSecondary, fontFamily: theme.typography.body1.fontFamily }]}>
                         Log in to view your profile, orders, and wishlist.
                     </Text>
                     <TouchableOpacity
                         style={[styles.loginButton, { backgroundColor: theme.colors.primary }]}
                         onPress={() => navigation.navigate('LoginNew')}
                     >
-                        <Text style={styles.loginButtonText}>Login / Sign Up</Text>
+                        <Text style={[styles.loginButtonText, { fontFamily: theme.typography.button.fontFamily }]}>Login / Sign Up</Text>
                     </TouchableOpacity>
+                    <Text style={[styles.versionText, { color: theme.colors.textSecondary, fontFamily: theme.typography.caption.fontFamily, marginTop: 24, opacity: 0.5 }]}>v{appVersion}</Text>
                 </View>
             </SafeAreaView>
         );
@@ -151,7 +159,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
             {/* Header Area */}
             <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
-                <Text style={[styles.headerTitle, { color: theme.colors.textPrimary }]}>My Account</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h2.fontFamily }]}>My Account</Text>
             </View>
 
             <ScrollView
@@ -168,24 +176,24 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                             <Text style={styles.avatarText}>{user?.firstName?.charAt(0) || user?.name?.charAt(0) || 'U'}</Text>
                         </View>
                         <View style={styles.profileInfo}>
-                            <Text style={[styles.userName, { color: theme.colors.textPrimary }]}>
+                            <Text style={[styles.userName, { color: theme.colors.textPrimary, fontFamily: theme.typography.h3.fontFamily }]}>
                                 {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.name || 'User'}
                             </Text>
-                            <Text style={[styles.userEmail, { color: theme.colors.textSecondary }]}>{user?.email}</Text>
-                            <Text style={[styles.userPhone, { color: theme.colors.textSecondary }]}>{user?.phoneNumber || '+91 -'}</Text>
+                            <Text style={[styles.userEmail, { color: theme.colors.textSecondary, fontFamily: theme.typography.body2.fontFamily }]}>{user?.email}</Text>
+                            <Text style={[styles.userPhone, { color: theme.colors.textSecondary, fontFamily: theme.typography.body2.fontFamily }]}>{user?.phoneNumber || '+91 -'}</Text>
                         </View>
                         <TouchableOpacity
                             onPress={() => navigation.navigate('EditProfile')}
                             style={styles.editButton}
                         >
-                            <Text style={[styles.editButtonText, { color: theme.colors.primary }]}>Edit</Text>
+                            <Text style={[styles.editButtonText, { color: theme.colors.primary, fontFamily: theme.typography.button.fontFamily }]}>Edit</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
 
                 {/* Section: Orders */}
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>ORDERS & SHOPPING</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary, fontFamily: theme.typography.body2.fontFamily, letterSpacing: 1.5 }]}>ORDERS & SHOPPING</Text>
                     <View style={[styles.sectionContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                         <MenuItem
                             title="My Orders"
@@ -210,7 +218,7 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
 
                 {/* Section: Settings */}
                 <View style={styles.section}>
-                    <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary }]}>ACCOUNT SETTINGS</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.textSecondary, fontFamily: theme.typography.body2.fontFamily, letterSpacing: 1.5 }]}>ACCOUNT SETTINGS</Text>
                     <View style={[styles.sectionContent, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                         <MenuItem
                             title="Dark Mode"
@@ -245,12 +253,15 @@ export const ProfileScreen: React.FC<{ navigation: any }> = ({ navigation }) => 
                     onPress={handleLogout}
                 >
                     <LogOut size={20} color={theme.colors.error} />
-                    <Text style={[styles.logoutText, { color: theme.colors.error }]}>Log Out</Text>
+                    <Text style={[styles.logoutText, { color: theme.colors.error, fontFamily: theme.typography.button.fontFamily }]}>Log Out</Text>
                 </TouchableOpacity>
 
-                <Text style={[styles.versionText, { color: theme.colors.textSecondary }]}>App Version 1.0.0</Text>
+                <Text style={[styles.versionText, { color: theme.colors.textSecondary, fontFamily: theme.typography.caption.fontFamily, textAlign: 'center', marginTop: 24, opacity: 0.5 }]}>v{appVersion}</Text>
 
             </ScrollView>
+            {/* <Text style={{ color: theme.colors.textPrimary }}>
+                Active Theme: {themeId} ({activeMode} mode)
+            </Text> */}
         </SafeAreaView>
     );
 };

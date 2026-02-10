@@ -29,10 +29,13 @@ interface LoginScreenProps {
   navigation: any;
 }
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const LoginScreen: React.FC<LoginScreenProps> = ({
   navigation,
 }) => {
   const dispatch = useAppDispatch();
+  const { showAlert } = useAlert();
   const { loading, isAuthenticated, token, accessToken, error } = useAppSelector((state) => state.auth);
 
   const [email, setEmail] = useState('');
@@ -41,37 +44,45 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
 
-  // Navigate to main app when authenticated (handles persistence rehydration)
+  // No manual navigation needed as AppNavigator is reactive
   useEffect(() => {
-    if (isAuthenticated && (token || accessToken)) {
-      // Check if navigation is ready and we are still on Login screen
-      const state = navigation.getState();
-      // Only reset if we are actually on a screen (avoiding some edge cases during init)
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
-    }
-  }, [isAuthenticated, token, accessToken, navigation]);
+    // This can be empty or removed if no other side effects are needed
+  }, []);
 
   const validateForm = () => {
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter your email address',
+        type: 'error'
+      });
       return false;
     }
 
     if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter a valid email address',
+        type: 'error'
+      });
       return false;
     }
 
     if (!password.trim()) {
-      Alert.alert('Error', 'Please enter your password');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter your password',
+        type: 'error'
+      });
       return false;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      showAlert({
+        title: 'Error',
+        message: 'Password must be at least 6 characters long',
+        type: 'error'
+      });
       return false;
     }
 
@@ -85,7 +96,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       await dispatch(loginUser({ email, password }));
     } catch (error) {
       console.error('❌ [LoginScreen] Login exception:', error);
-      Alert.alert('Login Error', 'An unexpected error occurred. Please try again.');
+      showAlert({
+        title: 'Login Error',
+        message: 'An unexpected error occurred. Please try again.',
+        type: 'error'
+      });
     }
   };
 
@@ -121,7 +136,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
   const handleGuestMode = () => {
     dispatch(enableGuestMode());
-    navigation.replace('Main');
   };
 
   return (

@@ -33,6 +33,7 @@ export const Colors = {
 
   // Card and surface colors
   card: '#FFFFFF',
+  cardBackground: '#FFFFFF',
   surface: '#FAFAFA',
 
   // Gradient colors

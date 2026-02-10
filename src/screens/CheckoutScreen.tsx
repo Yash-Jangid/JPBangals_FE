@@ -20,8 +20,11 @@ import { useEffect } from 'react';
 
 type PaymentMethod = 'COD' | 'PhonePe' | 'Razorpay';
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const CheckoutScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const dispatch = useAppDispatch();
+  const { showAlert } = useAlert();
   const { totalAmount, items } = useAppSelector((state) => state.cart);
   const { loading } = useAppSelector((state) => state.orders);
 
@@ -70,13 +73,21 @@ export const CheckoutScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     // Validate address
     if (!address.fullName || !address.phone || !address.addressLine1 ||
       !address.city || !address.state || !address.pincode) {
-      Alert.alert('Missing Information', 'Please fill in all required address fields');
+      showAlert({
+        title: 'Missing Information',
+        message: 'Please fill in all required address fields',
+        type: 'warning'
+      });
       return;
     }
 
     // Validate phone
     if (address.phone.length !== 10) {
-      Alert.alert('Invalid Phone', 'Please enter a valid 10-digit phone number');
+      showAlert({
+        title: 'Invalid Phone',
+        message: 'Please enter a valid 10-digit phone number',
+        type: 'warning'
+      });
       return;
     }
 
@@ -94,7 +105,11 @@ export const CheckoutScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
     };
 
     if (!payload.paymentMethod) {
-      Alert.alert('Payment Method Required', 'Please select a payment method');
+      showAlert({
+        title: 'Payment Method Required',
+        message: 'Please select a payment method',
+        type: 'warning'
+      });
       return;
     }
 
@@ -103,13 +118,18 @@ export const CheckoutScreen: React.FC<{ navigation: any }> = ({ navigation }) =>
       // Clear cart after successful order
       dispatch(clearCart());
 
-      Alert.alert(
-        'Order Placed!',
-        `Your order of ₹${totalAmount} has been placed successfully with ${selectedPayment}`,
-        [{ text: 'OK', onPress: () => navigation.navigate('Main', { screen: 'Home' }) }]
-      );
+      showAlert({
+        title: 'Order Placed!',
+        message: `Your order of ₹${totalAmount} has been placed successfully with ${selectedPayment}`,
+        type: 'success',
+        buttons: [{ text: 'OK', onPress: () => navigation.navigate('Main', { screen: 'Home' }) }]
+      });
     } catch (error) {
-      Alert.alert('Order Failed', typeof error === 'string' ? error : 'Failed to place order. Please try again.');
+      showAlert({
+        title: 'Order Failed',
+        message: typeof error === 'string' ? error : 'Failed to place order. Please try again.',
+        type: 'error'
+      });
     }
   };
 

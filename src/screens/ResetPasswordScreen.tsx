@@ -23,10 +23,13 @@ import { CustomToast, ToastType } from '../components/CustomToast';
 type ResetPasswordScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ResetPassword'>;
 type ResetPasswordScreenRouteProp = RouteProp<RootStackParamList, 'ResetPassword'>;
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 const ResetPasswordScreen = () => {
     const navigation = useNavigation<ResetPasswordScreenNavigationProp>();
     const route = useRoute<ResetPasswordScreenRouteProp>();
     const { theme } = useTheme();
+    const { showAlert } = useAlert();
     const { email, otp } = route.params;
 
     const [newPassword, setNewPassword] = useState('');
@@ -75,10 +78,11 @@ const ResetPasswordScreen = () => {
 
             // Show success message and navigate to login
             setTimeout(() => {
-                Alert.alert(
-                    'Success',
-                    'Your password has been reset successfully. Please sign in with your new password.',
-                    [
+                showAlert({
+                    title: 'Success',
+                    message: 'Your password has been reset successfully. Please sign in with your new password.',
+                    type: 'success',
+                    buttons: [
                         {
                             text: 'Sign In',
                             onPress: () => {
@@ -89,7 +93,7 @@ const ResetPasswordScreen = () => {
                             },
                         },
                     ]
-                );
+                });
             }, 500);
         } catch (err: any) {
             setError(err.message || 'Failed to reset password. Please try again.');

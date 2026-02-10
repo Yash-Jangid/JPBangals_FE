@@ -20,6 +20,7 @@ import { loginUser, clearError, enableGuestMode } from '../store/slices/authSlic
 import { Mail, Lock, Eye, EyeOff, ChevronRight, ArrowRight } from 'lucide-react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { GoogleIcon } from '../components/icons/GoogleIcon';
+import DeviceInfo from 'react-native-device-info';
 
 const { width } = Dimensions.get('window');
 
@@ -27,9 +28,12 @@ interface LoginNewScreenProps {
     navigation: any;
 }
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) => {
     const { theme } = useTheme();
     const dispatch = useAppDispatch();
+    const { showAlert } = useAlert();
     const { loading, isAuthenticated, accessToken, error } = useAppSelector((state) => state.auth);
 
     const [email, setEmail] = useState('');
@@ -38,20 +42,18 @@ export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) =>
     const [localLoading, setLocalLoading] = useState(false);
 
     useEffect(() => {
-        if (isAuthenticated && accessToken) {
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'Main' }],
-            });
-        }
         return () => {
             dispatch(clearError());
         };
-    }, [isAuthenticated, accessToken, navigation, dispatch]);
+    }, [dispatch]);
 
     const handleLogin = async () => {
         if (!email.trim() || !password.trim()) {
-            Alert.alert('Required', 'Please enter your credentials');
+            showAlert({
+                title: 'Required',
+                message: 'Please enter your credentials',
+                type: 'warning'
+            });
             return;
         }
 
@@ -60,10 +62,16 @@ export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) =>
         try {
             const result = await dispatch(loginUser({ email, password }));
             if (loginUser.rejected.match(result)) {
-                // Error is handled by Redux state, but we stop local loading
+                // Error is handled by Redux state, but we could also show an alert here if preferred
+                // Current UI uses a text error below the fields (line 140)
             }
         } catch (err) {
             console.error('Login Error:', err);
+            showAlert({
+                title: 'Login Error',
+                message: 'An unexpected error occurred. Please try again.',
+                type: 'error'
+            });
         } finally {
             setLocalLoading(false);
         }
@@ -97,7 +105,9 @@ export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) =>
 
                     <View style={styles.form}>
                         <View style={styles.inputContainer}>
-                            <Text style={[styles.label, { color: theme.colors.textSecondary }]}>EMAIL ADDRESS</Text>
+                            <View style={styles.labelRow}>
+                                <Text style={[styles.label, { color: theme.colors.textSecondary }]}>EMAIL ADDRESS</Text>
+                            </View>
                             <View style={[styles.inputWrapper, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
                                 <Mail size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
                                 <TextInput
@@ -188,6 +198,12 @@ export const LoginNewScreen: React.FC<LoginNewScreenProps> = ({ navigation }) =>
                         <Text style={[styles.guestText, { color: theme.colors.textSecondary }]}>Browse as Guest</Text>
                         <ChevronRight size={18} color={theme.colors.textSecondary} />
                     </TouchableOpacity> */}
+
+                    <View style={styles.versionContainer}>
+                        <Text style={[styles.versionText, { color: theme.colors.textSecondary + '60' }]}>
+                            v{DeviceInfo.getVersion()} ({DeviceInfo.getBuildNumber()})
+                        </Text>
+                    </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -262,7 +278,7 @@ const styles = StyleSheet.create({
         height: 56,
         borderRadius: 12,
         borderWidth: 1,
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
     },
     inputIcon: {
         marginRight: 12,
@@ -357,5 +373,15 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '600',
         marginRight: 4,
+    },
+    versionContainer: {
+        marginTop: 40,
+        marginBottom: 8,
+        alignItems: 'center',
+    },
+    versionText: {
+        fontSize: 12,
+        fontWeight: '500',
+        letterSpacing: 0.5,
     },
 });

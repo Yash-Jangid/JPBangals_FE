@@ -8,13 +8,14 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { CustomHeader } from '../components/CustomHeader';
-import { colors } from '../theme/colors';
+import { useTheme } from '../theme/ThemeContext';
 import { Fonts } from '../common/fonts';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchOrders } from '../store/slices/ordersSlice';
 import { Order } from '../api/ordersApi';
 
 export const OrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
+    const { theme } = useTheme();
     const dispatch = useAppDispatch();
     const { orders, loading, error } = useAppSelector((state) => state.orders);
 
@@ -28,37 +29,37 @@ export const OrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'DELIVERED': return colors.semantic.success;
-            case 'SHIPPED': return colors.semantic.info;
-            case 'CANCELLED': return colors.semantic.error;
-            case 'PENDING': return colors.semantic.warning;
-            default: return colors.text.secondary;
+            case 'DELIVERED': return theme.colors.success;
+            case 'SHIPPED': return theme.colors.info;
+            case 'CANCELLED': return theme.colors.error;
+            case 'PENDING': return theme.colors.primary;
+            default: return theme.colors.textSecondary;
         }
     };
 
     const renderOrderItem = ({ item }: { item: Order }) => (
         <TouchableOpacity
-            style={styles.orderCard}
+            style={[styles.orderCard, { backgroundColor: theme.colors.surface, shadowColor: theme.colors.textPrimary }]}
             onPress={() => navigateToDetails(item.id)}
         >
             <View style={styles.orderHeader}>
-                <Text style={styles.orderNumber}>Order #{item.orderNumber}</Text>
+                <Text style={[styles.orderNumber, { color: theme.colors.textPrimary }]}>Order #{item.orderNumber}</Text>
                 <Text style={[styles.orderStatus, { color: getStatusColor(item.status) }]}>
                     {item.status}
                 </Text>
             </View>
 
-            <Text style={styles.orderDate}>
+            <Text style={[styles.orderDate, { color: theme.colors.textSecondary }]}>
                 Placed on {new Date(item.createdAt).toLocaleDateString()}
             </Text>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.colors.divider }]} />
 
             <View style={styles.orderFooter}>
-                <Text style={styles.itemCount}>
+                <Text style={[styles.itemCount, { color: theme.colors.textSecondary }]}>
                     {item.items.length} {item.items.length === 1 ? 'item' : 'items'}
                 </Text>
-                <Text style={styles.totalAmount}>₹{item.totalAmount}</Text>
+                <Text style={[styles.totalAmount, { color: theme.colors.primary }]}>₹{item.totalAmount}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -66,32 +67,32 @@ export const OrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const renderEmptyList = () => (
         <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📦</Text>
-            <Text style={styles.emptyTitle}>No orders yet</Text>
-            <Text style={styles.emptySubtitle}>
+            <Text style={[styles.emptyTitle, { color: theme.colors.textPrimary }]}>No orders yet</Text>
+            <Text style={[styles.emptySubtitle, { color: theme.colors.textSecondary }]}>
                 Start shopping to see your orders here
             </Text>
             <TouchableOpacity
-                style={styles.shopButton}
+                style={[styles.shopButton, { backgroundColor: theme.colors.primary }]}
                 onPress={() => navigation.navigate('Main', { screen: 'Home' })}
             >
-                <Text style={styles.shopButtonText}>Start Shopping</Text>
+                <Text style={[styles.shopButtonText, { color: theme.colors.textInverse }]}>Start Shopping</Text>
             </TouchableOpacity>
         </View>
     );
 
     if (loading.list && orders.length === 0) {
         return (
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
                 <CustomHeader title="My Orders" showBackButton onBackPress={() => navigation.goBack()} />
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.primary.main} />
+                    <ActivityIndicator size="large" color={theme.colors.primary} />
                 </View>
             </View>
         );
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <CustomHeader title="My Orders" showBackButton onBackPress={() => navigation.goBack()} />
 
             <FlatList
@@ -110,7 +111,6 @@ export const OrdersScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background.secondary,
     },
     loadingContainer: {
         flex: 1,
@@ -122,12 +122,10 @@ const styles = StyleSheet.create({
         flexGrow: 1,
     },
     orderCard: {
-        backgroundColor: colors.neutral.white,
         borderRadius: 12,
         padding: 16,
         marginBottom: 12,
         elevation: 2,
-        shadowColor: colors.text.primary,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
@@ -141,7 +139,6 @@ const styles = StyleSheet.create({
     orderNumber: {
         fontSize: 16,
         fontFamily: Fonts.semiBold,
-        color: colors.text.primary,
     },
     orderStatus: {
         fontSize: 14,
@@ -150,11 +147,9 @@ const styles = StyleSheet.create({
     orderDate: {
         fontSize: 14,
         fontFamily: Fonts.regular,
-        color: colors.text.secondary,
     },
     divider: {
         height: 1,
-        backgroundColor: colors.border.light,
         marginVertical: 12,
     },
     orderFooter: {
@@ -165,12 +160,10 @@ const styles = StyleSheet.create({
     itemCount: {
         fontSize: 14,
         fontFamily: Fonts.regular,
-        color: colors.text.secondary,
     },
     totalAmount: {
         fontSize: 16,
         fontFamily: Fonts.bold,
-        color: colors.primary.main,
     },
     emptyContainer: {
         flex: 1,
@@ -186,13 +179,11 @@ const styles = StyleSheet.create({
     emptyTitle: {
         fontSize: 20,
         fontFamily: Fonts.semiBold,
-        color: colors.text.primary,
         marginBottom: 8,
     },
     emptySubtitle: {
         fontSize: 14,
         fontFamily: Fonts.regular,
-        color: colors.text.secondary,
         textAlign: 'center',
         marginBottom: 24,
     },
@@ -200,11 +191,9 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 24,
         borderRadius: 8,
-        backgroundColor: colors.primary.main,
     },
     shopButtonText: {
         fontSize: 16,
         fontFamily: Fonts.medium,
-        color: colors.neutral.white,
     },
 });

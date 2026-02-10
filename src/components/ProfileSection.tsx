@@ -1,7 +1,6 @@
 import React, { memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors } from '../common/colors';
-import { Fonts } from '../common/fonts';
+import { useTheme } from '../theme/ThemeContext';
 
 interface ProfileSectionProps {
   title: string;
@@ -26,22 +25,24 @@ export const ProfileSection = memo<ProfileSectionProps>(({
   emptyMessage = 'No data available',
   showEmptyState = false,
 }) => {
+  const { theme } = useTheme();
+
   if (loading) {
     return (
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { backgroundColor: theme.colors.surfaceHighlight }]}>
           <View style={styles.sectionTitleContainer}>
             {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
-            <Text style={styles.sectionTitle}>{title}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h3.fontFamily }]}>{title}</Text>
           </View>
           {onViewAll && (
-            <View style={styles.loadingIndicator}>
-              <Text style={styles.loadingText}>Loading...</Text>
+            <View style={[styles.loadingIndicator, { backgroundColor: theme.colors.border }]}>
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary, fontFamily: theme.typography.caption.fontFamily }]}>Loading...</Text>
             </View>
           )}
         </View>
-        <View style={styles.loadingContent}>
-          <Text style={styles.loadingText}>{emptyMessage}</Text>
+        <View style={[styles.loadingContent, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.loadingText, { color: theme.colors.textSecondary, fontFamily: theme.typography.caption.fontFamily }]}>{emptyMessage}</Text>
         </View>
       </View>
     );
@@ -50,14 +51,14 @@ export const ProfileSection = memo<ProfileSectionProps>(({
   if (error) {
     return (
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { backgroundColor: theme.colors.surfaceHighlight }]}>
           <View style={styles.sectionTitleContainer}>
             {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
-            <Text style={styles.sectionTitle}>{title}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h3.fontFamily }]}>{title}</Text>
           </View>
         </View>
-        <View style={styles.errorContent}>
-          <Text style={styles.errorText}>Error: {error}</Text>
+        <View style={[styles.errorContent, { backgroundColor: theme.colors.error + '10', borderColor: theme.colors.error + '20' }]}>
+          <Text style={[styles.errorText, { color: theme.colors.error, fontFamily: theme.typography.body2.fontFamily }]}>Error: {error}</Text>
         </View>
       </View>
     );
@@ -66,19 +67,19 @@ export const ProfileSection = memo<ProfileSectionProps>(({
   if (showEmptyState) {
     return (
       <View style={styles.section}>
-        <View style={styles.sectionHeader}>
+        <View style={[styles.sectionHeader, { backgroundColor: theme.colors.surfaceHighlight }]}>
           <View style={styles.sectionTitleContainer}>
             {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
-            <Text style={styles.sectionTitle}>{title}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h3.fontFamily }]}>{title}</Text>
           </View>
           {onViewAll && (
             <TouchableOpacity onPress={onViewAll}>
-              <Text style={styles.seeAllText}>{viewAllText}</Text>
+              <Text style={[styles.seeAllText, { color: theme.colors.primary, fontFamily: theme.typography.body2.fontFamily }]}>{viewAllText}</Text>
             </TouchableOpacity>
           )}
         </View>
-        <View style={styles.emptyContent}>
-          <Text style={styles.emptyText}>{emptyMessage}</Text>
+        <View style={[styles.emptyContent, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.emptyText, { color: theme.colors.textSecondary, fontFamily: theme.typography.body2.fontFamily }]}>{emptyMessage}</Text>
         </View>
       </View>
     );
@@ -86,14 +87,14 @@ export const ProfileSection = memo<ProfileSectionProps>(({
 
   return (
     <View style={styles.section}>
-      <View style={styles.sectionHeader}>
+      <View style={[styles.sectionHeader, { backgroundColor: theme.colors.surfaceHighlight }]}>
         <View style={styles.sectionTitleContainer}>
           {icon && <Text style={styles.sectionIcon}>{icon}</Text>}
-          <Text style={styles.sectionTitle}>{title}</Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary, fontFamily: theme.typography.h3.fontFamily }]}>{title}</Text>
         </View>
         {onViewAll && (
           <TouchableOpacity onPress={onViewAll}>
-            <Text style={styles.seeAllText}>{viewAllText}</Text>
+            <Text style={[styles.seeAllText, { color: theme.colors.primary, fontFamily: theme.typography.body2.fontFamily }]}>{viewAllText}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -112,14 +113,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-    backgroundColor: Colors.backgroundSecondary,
     padding: 10,
     borderRadius: 10,
   },
   sectionTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    
+
   },
   sectionIcon: {
     fontSize: 20,
@@ -128,55 +128,40 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.textPrimary,
-    fontFamily: Fonts.medium,
   },
   seeAllText: {
     fontSize: 14,
-    color: Colors.primary,
-    fontFamily: Fonts.medium,
   },
   loadingIndicator: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    backgroundColor: Colors.border,
     borderRadius: 12,
   },
   loadingText: {
     fontSize: 12,
-    color: Colors.textMuted,
-    fontFamily: Fonts.regular,
   },
   loadingContent: {
-    backgroundColor: Colors.cardBackground,
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
   },
   errorContent: {
-    backgroundColor: Colors.error + '10',
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.error + '20',
   },
   errorText: {
     fontSize: 14,
-    color: Colors.error,
-    fontFamily: Fonts.medium,
     textAlign: 'center',
   },
   emptyContent: {
-    backgroundColor: Colors.cardBackground,
     padding: 20,
     borderRadius: 12,
     alignItems: 'center',
   },
   emptyText: {
     fontSize: 14,
-    color: Colors.textMuted,
-    fontFamily: Fonts.regular,
     textAlign: 'center',
   },
 });

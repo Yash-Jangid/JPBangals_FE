@@ -2,6 +2,8 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -82,8 +84,8 @@ android {
         applicationId 'com.jbangalsapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName '2.2.1'
+        versionCode 8
+        versionName '2.5.1'
         
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", "false"
         buildConfigField "boolean", "IS_HERMES_ENABLED", "true"

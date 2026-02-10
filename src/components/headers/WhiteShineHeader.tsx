@@ -72,13 +72,13 @@ export const WhiteShineHeader: React.FC<WhiteShineHeaderProps> = React.memo(({
                             <Search size={24} color={theme.colors.textPrimary} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             onPress={onCartPress}
                             style={styles.iconButton}
                             activeOpacity={0.7}
                         >
                             <ShoppingCart size={24} color={theme.colors.textPrimary} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
                 </View>
             </SafeAreaView>

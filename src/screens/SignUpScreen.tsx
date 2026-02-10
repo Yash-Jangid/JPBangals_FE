@@ -32,11 +32,14 @@ interface SignUpScreenProps {
   onSignUpSuccess?: (user: any) => void;
 }
 
+import { useAlert } from '../components/ui/CustomAlertProvider';
+
 export const SignUpScreen: React.FC<SignUpScreenProps> = ({
   navigation,
   onSignUpSuccess,
 }) => {
   const dispatch = useAppDispatch();
+  const { showAlert } = useAlert();
   const { loading, isAuthenticated, error } = useAppSelector((state) => state.auth);
 
   const [name, setName] = useState('');
@@ -48,47 +51,78 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
 
   const handleGuestMode = () => {
     dispatch(enableGuestMode());
-    navigation.navigate('Main');
   };
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter your full name');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter your full name',
+        type: 'error'
+      });
       return false;
     }
 
     if (name.trim().length < 2) {
-      Alert.alert('Error', 'Name must be at least 2 characters long');
+      showAlert({
+        title: 'Error',
+        message: 'Name must be at least 2 characters long',
+        type: 'error'
+      });
       return false;
     }
 
     if (!email.trim()) {
-      Alert.alert('Error', 'Please enter your email address');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter your email address',
+        type: 'error'
+      });
       return false;
     }
 
     if (!email.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter a valid email address',
+        type: 'error'
+      });
       return false;
     }
 
     if (!password.trim()) {
-      Alert.alert('Error', 'Please enter your password');
+      showAlert({
+        title: 'Error',
+        message: 'Please enter your password',
+        type: 'error'
+      });
       return false;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters long');
+      showAlert({
+        title: 'Error',
+        message: 'Password must be at least 6 characters long',
+        type: 'error'
+      });
       return false;
     }
 
     if (!confirmPassword.trim()) {
-      Alert.alert('Error', 'Please confirm your password');
+      showAlert({
+        title: 'Error',
+        message: 'Please confirm your password',
+        type: 'error'
+      });
       return false;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showAlert({
+        title: 'Error',
+        message: 'Passwords do not match',
+        type: 'error'
+      });
       return false;
     }
 
@@ -113,10 +147,11 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       }));
 
       if (registerUser.fulfilled.match(result)) {
-        Alert.alert(
-          'Success',
-          'Account created successfully! You are now logged in.',
-          [
+        showAlert({
+          title: 'Success',
+          message: 'Account created successfully! You are now logged in.',
+          type: 'success',
+          buttons: [
             {
               text: 'OK',
               onPress: () => {
@@ -129,13 +164,21 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
               },
             },
           ]
-        );
+        });
       } else if (registerUser.rejected.match(result)) {
-        Alert.alert('Registration Failed', result.payload as string || 'Failed to create account');
+        showAlert({
+          title: 'Registration Failed',
+          message: result.payload as string || 'Failed to create account',
+          type: 'error'
+        });
       }
     } catch (error) {
       console.error('❌ [SignUpScreen] Registration exception:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'An unexpected error occurred. Please try again.',
+        type: 'error'
+      });
     }
   };
 
@@ -146,11 +189,19 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
       if (result.success && result.token) {
         navigation.navigate('Main');
       } else {
-        Alert.alert('Sign Up Failed', result.error || 'Failed to sign up with Google');
+        showAlert({
+          title: 'Sign Up Failed',
+          message: result.error || 'Failed to sign up with Google',
+          type: 'error'
+        });
       }
     } catch (error) {
       console.error('Google sign up error:', error);
-      Alert.alert('Error', 'Failed to sign up with Google. Please try again.');
+      showAlert({
+        title: 'Error',
+        message: 'Failed to sign up with Google. Please try again.',
+        type: 'error'
+      });
     }
   };
 
