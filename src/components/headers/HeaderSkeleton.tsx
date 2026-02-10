@@ -1,9 +1,3 @@
-/**
- * Header Skeleton Loader
- * 
- * Loading placeholder for header while theme is being resolved
- */
-
 import React from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,12 +19,9 @@ export const HeaderSkeleton: React.FC = React.memo(() => {
                     borderBottomColor: theme.colors.border,
                 }
             ]}>
-                {/* Logo Skeleton */}
                 <View style={styles.leftSection}>
                     <SkeletonLoader width={100} height={40} borderRadius={8} />
                 </View>
-
-                {/* Icons Skeleton */}
                 <View style={styles.rightSection}>
                     <SkeletonLoader width={24} height={24} borderRadius={12} />
                     <SkeletonLoader width={24} height={24} borderRadius={12} />

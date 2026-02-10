@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Maroon background -->
     <item android:drawable="@color/splash_background" />
-    <!-- Shadow effect beneath the logo -->
+    
+    <!-- Radial shadow beneath logo -->
     <item android:gravity="center">
         <shape android:shape="oval">
             <size android:width="220dp" android:height="220dp" />
@@ -14,7 +16,7 @@
     </item>
     
     <!-- App logo -->
-    <item
-        android:gravity="center"
-        android:drawable="@drawable/splash_logo" />
+    <item android:gravity="center">
+        <bitmap android:src="@drawable/splash_logo" />
+    </item>
 </layer-list>

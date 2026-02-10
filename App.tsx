@@ -10,28 +10,39 @@ import { Colors } from './src/common/colors';
 import { Fonts } from './src/common/fonts';
 import { store, persistor } from './src/store';
 // import socialLoginService from './src/services/SocialLoginService';
-import { ThemeProvider } from './src/theme/ThemeContext';
+import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AuthListener } from './src/components/AuthListener';
 import { CustomAlertProvider } from './src/components/ui/CustomAlertProvider';
 
+const AppContent: React.FC = () => {
+  return (
+    <View style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <CustomAlertProvider>
+          <SafeAreaProvider>
+            <AppNavigator />
+          </SafeAreaProvider>
+        </CustomAlertProvider>
+      </GestureHandlerRootView>
+    </View>
+  );
+};
+
 const App: React.FC = () => {
-  // useEffect(() => {
-  //   // Initialize social login services when app starts
-  //   socialLoginService.initializeAll();
-  // }, []);
+  useEffect(() => {
+    console.log('🏁 [SplashTrace] JS: App Root Provider mounted.');
+  }, []);
 
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate
+        loading={null}
+        persistor={persistor}
+        onBeforeLift={() => console.log('🏁 [SplashTrace] JS: PersistGate onBeforeLift (Redux Hydrated)')}
+      >
         <ThemeProvider>
           <AuthListener />
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <CustomAlertProvider>
-              <SafeAreaProvider>
-                <AppNavigator />
-              </SafeAreaProvider>
-            </CustomAlertProvider>
-          </GestureHandlerRootView>
+          <AppContent />
         </ThemeProvider>
       </PersistGate>
     </Provider>

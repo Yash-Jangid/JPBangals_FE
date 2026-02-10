@@ -1,17 +1,15 @@
-import { Text, Image, Platform, View, StyleSheet } from 'react-native';
+import { Text, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { enableScreens } from 'react-native-screens';
 import 'react-native-gesture-handler';
 import { useAppSelector } from '../store/hooks';
-import { Home, Grid, ShoppingCart, User, Heart } from 'lucide-react-native';
+import { Home, Grid, User, Heart } from 'lucide-react-native';
 
 // Enable screens for better performance
 enableScreens();
 
-import { LoginScreen } from '../screens/LoginScreen';
-import { SignUpScreen } from '../screens/SignUpScreen';
 import { LoginNewScreen } from '../screens/LoginNewScreen';
 import { SignUpNewScreen } from '../screens/SignUpNewScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -37,8 +35,6 @@ import { setOffline, setServiceUnavailable } from '../store/slices/appSettingsSl
 
 // Types
 import { RootStackParamList, TabParamList } from '../types/navigation';
-import { Colors } from '../common/colors';
-import { colors } from '../theme/colors';
 import { useTheme } from '../theme/ThemeContext';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -150,7 +146,7 @@ export const AppNavigator = () => {
 
   return (
     <NavigationContainer
-      fallback={<Text>Loading...</Text>}
+      fallback={null}
     >
       <ConnectivityManager />
 
@@ -194,116 +190,4 @@ export const AppNavigator = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  // iOS Tab Bar Styles
-  tabBarIOS: {
-    backgroundColor: '#ffffff',
-    borderTopWidth: 0.5,
-    borderTopColor: 'rgba(0, 0, 0, 0.12)',
-    paddingTop: 8,
-    paddingBottom: 34, // Extra padding for iOS home indicator
-    height: 90,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 0,
-  },
 
-  // Android Tab Bar Styles
-  tabBarAndroid: {
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingTop: 8,
-    paddingBottom: 8,
-    height: 64,
-    elevation: 8,
-  },
-
-  // iOS Tab Label Styles
-  tabLabelIOS: {
-    fontSize: 11,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-
-  // Android Tab Label Styles
-  tabLabelAndroid: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-
-  // iOS Tab Icon Styles
-  tabIconIOS: {
-    marginBottom: 2,
-  },
-
-  // Android Tab Icon Styles
-  tabIconAndroid: {
-    marginBottom: 0,
-  },
-
-  // iOS Tab Item Styles
-  tabItemIOS: {
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-
-  // Android Tab Item Styles
-  tabItemAndroid: {
-    paddingTop: 6,
-    paddingBottom: 6,
-  },
-
-  // Icon Container Styles
-  iconContainerIOS: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 32,
-    height: 32,
-    position: 'relative',
-  },
-
-  iconContainerAndroid: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 28,
-    height: 28,
-  },
-
-  // Tab Icon Styles
-  tabIcon: {
-    width: 24,
-    height: 24,
-  },
-
-  // Profile Tab Icon Specific Styles
-  profileTabIcon: {
-    width: 26,
-    height: 26,
-  },
-
-  // Profile Tab Icon Active State
-  profileTabIconActive: {
-    opacity: 1,
-    transform: [{ scale: 1.1 }], // Slightly larger when active
-  },
-
-  // Profile Tab Icon Inactive State
-  profileTabIconInactive: {
-    opacity: 0.6,
-    transform: [{ scale: 1 }],
-  },
-
-  // iOS Active Indicator
-  activeIndicatorIOS: {
-    position: 'absolute',
-    top: -2,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary.main,
-  },
-});

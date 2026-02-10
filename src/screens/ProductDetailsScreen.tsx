@@ -22,6 +22,7 @@ import { addToWishlist, removeFromWishlist, selectWishlistItems, fetchWishlist }
 import { useTheme } from '../theme/ThemeContext';
 import { Heart, Share2, Star, ShoppingBag, Truck, RotateCcw, ShieldCheck } from 'lucide-react-native';
 import { WishlistToast } from '../components/WishlistToast';
+import { SkeletonLoader } from '../components/common/SkeletonLoader';
 
 const { width } = Dimensions.get('window');
 const ASPECT_RATIO = 1.25; // 4:5 or 3:4 for premium look
@@ -128,30 +129,41 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
 
 
 
-  if (loading.productDetails) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
+  const renderSkeleton = () => (
+    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <SkeletonLoader width={width} height={IMAGE_HEIGHT} borderRadius={0} />
+      <View style={styles.detailsContainer}>
+        <SkeletonLoader width="60%" height={24} style={{ marginBottom: 12 }} />
+        <SkeletonLoader width="40%" height={20} style={{ marginBottom: 20 }} />
+        <SkeletonLoader width="30%" height={32} style={{ marginBottom: 16 }} />
+        <View style={{ height: 1, backgroundColor: theme.colors.border, marginBottom: 20 }} />
+        <SkeletonLoader width="50%" height={20} style={{ marginBottom: 16 }} />
+        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+          {[1, 2, 3, 4].map(i => <SkeletonLoader key={i} width={48} height={48} borderRadius={24} />)}
+        </View>
+        <SkeletonLoader width="100%" height={100} borderRadius={8} />
       </View>
-    );
-  }
+    </ScrollView>
+  );
 
-  if (error.productDetails || !selectedProduct) {
-    console.log(error.productDetails);
-    return (
-      <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
-        <Text style={[styles.errorText, { color: theme.colors.textPrimary }]}>{error.productDetails || 'Product not found'}</Text>
-        <TouchableOpacity
-          style={[styles.backButton, { backgroundColor: theme.colors.primary }]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const renderError = () => (
+    <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
+      <Text style={[styles.errorText, { color: theme.colors.textPrimary }]}>
+        {error.productDetails || 'Product not found'}
+      </Text>
+      <TouchableOpacity
+        style={[styles.backButton, { backgroundColor: theme.colors.primary }]}
+        onPress={() => navigation.goBack()}
+      >
+        <Text style={styles.backButtonText}>Go Back</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
-  const { name, description, mrp, sellingPrice, discountPercentage, images, specifications } = selectedProduct;
+  const isInitialLoad = !selectedProduct && !error.productDetails;
+  const isLoading = loading.productDetails || isInitialLoad;
+
+  const { name = '', description = '', mrp = '', sellingPrice = '', discountPercentage = '', images = [], specifications = {} } = selectedProduct || {};
   const displayImages = images.length > 0 ? images.map(img => img.imageUrl) : ['https://via.placeholder.com/400'];
   const discount = Math.round(parseFloat(discountPercentage || '0'));
 
@@ -165,165 +177,173 @@ export const ProductDetailsScreen: React.FC<{ navigation: any; route: any }> = (
     </View>
   );
 
-
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <CustomHeader
-        title={name}
+        title={selectedProduct?.name || 'Loading...'}
         showBackButton
         onBackPress={() => navigation.goBack()}
         rightComponent={
-          <TouchableOpacity onPress={handleShare}>
-            <Share2 size={24} color={theme.colors.textPrimary} />
-          </TouchableOpacity>
+          selectedProduct ? (
+            <TouchableOpacity onPress={handleShare}>
+              <Share2 size={24} color={theme.colors.textPrimary} />
+            </TouchableOpacity>
+          ) : null
         }
       />
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.carouselContainer}>
-          <FlatList
-            data={displayImages}
-            renderItem={renderProductImage}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onMomentumScrollEnd={(event) => {
-              const index = Math.round(event.nativeEvent.contentOffset.x / width);
-              setSelectedImageIndex(index);
-            }}
-            keyExtractor={(_, index) => index.toString()}
-          />
-
-          <TouchableOpacity
-            style={styles.wishlistFloat}
-            onPress={handleToggleWishlist}
-          >
-            <Heart
-              size={24}
-              color={isWishlisted ? "#FF3E6C" : "#555"}
-              fill={isWishlisted ? "#FF3E6C" : "transparent"}
-            />
-          </TouchableOpacity>
-
-          <View style={styles.paginationContainer}>
-            {displayImages.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.paginationDot,
-                  { backgroundColor: selectedImageIndex === index ? theme.colors.primary : 'rgba(0,0,0,0.2)' }
-                ]}
+      {isLoading ? (
+        renderSkeleton()
+      ) : error.productDetails || !selectedProduct ? (
+        renderError()
+      ) : (
+        <>
+          <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+            <View style={styles.carouselContainer}>
+              <FlatList
+                data={displayImages}
+                renderItem={renderProductImage}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={(event) => {
+                  const index = Math.round(event.nativeEvent.contentOffset.x / width);
+                  setSelectedImageIndex(index);
+                }}
+                keyExtractor={(_, index) => index.toString()}
               />
-            ))}
-          </View>
-        </View>
 
-        {/* Product Details */}
-        <View style={[styles.detailsContainer, { backgroundColor: theme.colors.background }]}>
-          {/* Title & Brand */}
-          <View style={styles.headerInfo}>
-            <Text style={[styles.brandName, { color: theme.colors.textSecondary }]}>
-              {specifications?.material || 'Premium Brand'}
-            </Text>
-            <Text style={[styles.productTitle, { color: theme.colors.textPrimary }]}>{name}</Text>
-          </View>
-
-          {/* Pricing */}
-          <View style={[styles.priceBlock, { borderBottomColor: theme.colors.border }]}>
-            <View style={styles.priceRow}>
-              <Text style={[styles.sellingPrice, { color: theme.colors.textPrimary }]}>₹{sellingPrice}</Text>
-              {discount > 0 && (
-                <>
-                  <Text style={[styles.mrp, { color: theme.colors.textSecondary }]}>MRP ₹{mrp}</Text>
-                  <Text style={styles.discountText}>({discount}% OFF)</Text>
-                </>
-              )}
-            </View>
-            <Text style={styles.taxText}>inclusive of all taxes</Text>
-          </View>
-
-          {/* Size Selection */}
-          <View style={[styles.selectionBlock, { borderBottomColor: theme.colors.border }]}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>SELECT SIZE</Text>
-              <TouchableOpacity>
-                <Text style={[styles.sizeGuideText, { color: theme.colors.primary }]}>Size Chart</Text>
+              <TouchableOpacity
+                style={styles.wishlistFloat}
+                onPress={handleToggleWishlist}
+              >
+                <Heart
+                  size={24}
+                  color={isWishlisted ? "#FF3E6C" : "#555"}
+                  fill={isWishlisted ? "#FF3E6C" : "transparent"}
+                />
               </TouchableOpacity>
+
+              <View style={styles.paginationContainer}>
+                {displayImages.map((_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      styles.paginationDot,
+                      { backgroundColor: selectedImageIndex === index ? theme.colors.primary : 'rgba(0,0,0,0.2)' }
+                    ]}
+                  />
+                ))}
+              </View>
             </View>
-            <View style={styles.sizeOptions}>
-              {BANGLE_SIZES.map((size) => (
-                <TouchableOpacity
-                  key={size}
-                  style={[
-                    styles.sizeCircle,
-                    selectedSize === size
-                      ? { borderColor: theme.colors.primary, backgroundColor: theme.colors.background }
-                      : { borderColor: theme.colors.border }
-                  ]}
-                  onPress={() => setSelectedSize(size)}
-                >
-                  <Text style={[
-                    styles.sizeText,
-                    selectedSize === size ? { color: theme.colors.primary } : { color: theme.colors.textSecondary }
-                  ]}>{size}</Text>
-                </TouchableOpacity>
-              ))}
+
+            {/* Product Details */}
+            <View style={[styles.detailsContainer, { backgroundColor: theme.colors.background }]}>
+              {/* Title & Brand */}
+              <View style={styles.headerInfo}>
+                <Text style={[styles.brandName, { color: theme.colors.textSecondary }]}>
+                  {specifications?.material || 'Premium Brand'}
+                </Text>
+                <Text style={[styles.productTitle, { color: theme.colors.textPrimary }]}>{name}</Text>
+              </View>
+
+              {/* Pricing */}
+              <View style={[styles.priceBlock, { borderBottomColor: theme.colors.border }]}>
+                <View style={styles.priceRow}>
+                  <Text style={[styles.sellingPrice, { color: theme.colors.textPrimary }]}>₹{sellingPrice}</Text>
+                  {discount > 0 && (
+                    <>
+                      <Text style={[styles.mrp, { color: theme.colors.textSecondary }]}>MRP ₹{mrp}</Text>
+                      <Text style={styles.discountText}>({discount}% OFF)</Text>
+                    </>
+                  )}
+                </View>
+                <Text style={styles.taxText}>inclusive of all taxes</Text>
+              </View>
+
+              {/* Size Selection */}
+              <View style={[styles.selectionBlock, { borderBottomColor: theme.colors.border }]}>
+                <View style={styles.sectionHeaderRow}>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>SELECT SIZE</Text>
+                  <TouchableOpacity>
+                    <Text style={[styles.sizeGuideText, { color: theme.colors.primary }]}>Size Chart</Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.sizeOptions}>
+                  {BANGLE_SIZES.map((size) => (
+                    <TouchableOpacity
+                      key={size}
+                      style={[
+                        styles.sizeCircle,
+                        selectedSize === size
+                          ? { borderColor: theme.colors.primary, backgroundColor: theme.colors.background }
+                          : { borderColor: theme.colors.border }
+                      ]}
+                      onPress={() => setSelectedSize(size)}
+                    >
+                      <Text style={[
+                        styles.sizeText,
+                        selectedSize === size ? { color: theme.colors.primary } : { color: theme.colors.textSecondary }
+                      ]}>{size}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Delivery & Services */}
+              <View style={[styles.serviceBlock, { borderBottomColor: theme.colors.border }]}>
+                <View style={styles.serviceItem}>
+                  <Truck size={20} color={theme.colors.textSecondary} />
+                  <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>Free Delivery</Text>
+                </View>
+                <View style={styles.serviceItem}>
+                  <RotateCcw size={20} color={theme.colors.textSecondary} />
+                  <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>30 Days Return</Text>
+                </View>
+                <View style={styles.serviceItem}>
+                  <ShieldCheck size={20} color={theme.colors.textSecondary} />
+                  <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>100% Original</Text>
+                </View>
+              </View>
+
+              {/* Product Description */}
+              <View style={styles.descBlock}>
+                <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>PRODUCT DETAILS</Text>
+                <Text style={[styles.descriptionText, { color: theme.colors.textSecondary }]}>
+                  {description}
+                </Text>
+              </View>
+
+              {/* Spacer for bottom bar */}
+              <View style={{ height: 80 }} />
             </View>
+          </ScrollView>
+
+          {/* Sticky Bottom Action Bar */}
+          <View style={[styles.bottomBar, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
+            <TouchableOpacity
+              style={[styles.cartButton, { borderColor: theme.colors.border }]}
+              onPress={handleAddToCart}
+              disabled={actionLoading?.add}
+            >
+              <ShoppingBag size={20} color={theme.colors.textPrimary} style={{ marginRight: 8 }} />
+              <Text style={[styles.cartButtonText, { color: theme.colors.textPrimary }]}>Add to Bag</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.buyButton, { backgroundColor: theme.colors.primary }]}
+              onPress={handleBuyNow}
+              disabled={actionLoading?.add}
+            >
+              {actionLoading?.add ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buyButtonText}>Buy Now</Text>
+              )}
+            </TouchableOpacity>
           </View>
-
-          {/* Delivery & Services */}
-          <View style={[styles.serviceBlock, { borderBottomColor: theme.colors.border }]}>
-            <View style={styles.serviceItem}>
-              <Truck size={20} color={theme.colors.textSecondary} />
-              <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>Free Delivery</Text>
-            </View>
-            <View style={styles.serviceItem}>
-              <RotateCcw size={20} color={theme.colors.textSecondary} />
-              <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>30 Days Return</Text>
-            </View>
-            <View style={styles.serviceItem}>
-              <ShieldCheck size={20} color={theme.colors.textSecondary} />
-              <Text style={[styles.serviceText, { color: theme.colors.textPrimary }]}>100% Original</Text>
-            </View>
-          </View>
-
-          {/* Product Description */}
-          <View style={styles.descBlock}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.textPrimary }]}>PRODUCT DETAILS</Text>
-            <Text style={[styles.descriptionText, { color: theme.colors.textSecondary }]}>
-              {description}
-            </Text>
-          </View>
-
-          {/* Spacer for bottom bar */}
-          <View style={{ height: 80 }} />
-        </View>
-      </ScrollView>
-
-      {/* Sticky Bottom Action Bar */}
-      <View style={[styles.bottomBar, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }]}>
-        <TouchableOpacity
-          style={[styles.cartButton, { borderColor: theme.colors.border }]}
-          onPress={handleAddToCart}
-          disabled={actionLoading?.add}
-        >
-          <ShoppingBag size={20} color={theme.colors.textPrimary} style={{ marginRight: 8 }} />
-          <Text style={[styles.cartButtonText, { color: theme.colors.textPrimary }]}>Add to Bag</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.buyButton, { backgroundColor: theme.colors.primary }]}
-          onPress={handleBuyNow}
-          disabled={actionLoading?.add}
-        >
-          {actionLoading?.add ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buyButtonText}>Buy Now</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+        </>
+      )}
 
       <WishlistToast
         visible={toastVisible}
