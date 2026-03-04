@@ -2,8 +2,9 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import apiService from '../../services/ApiService';
 import { storageService, saveAccessToken, saveRefreshToken, clearAuthData } from '../../utils/storage';
 import * as authApi from '../../api/authApi';
+import * as registrationApi from '../../api/registrationApi';
 export interface User {
-	id: number;
+	id: number | string;
 	name: string;
 	email: string;
 	firstName?: string;
@@ -35,11 +36,14 @@ const initialState: AuthState = {
 	error: null,
 };
 
+import { API_CONFIG } from '../../config/api.config';
+
 // Register new user with backend API
 export const registerUser = createAsyncThunk(
 	'auth/register',
 	async (data: { firstName: string; lastName: string; email: string; password: string }, { rejectWithValue }) => {
 		try {
+			console.log('Registering user with BASE_URL:', API_CONFIG.BASE_URL);
 			const response = await authApi.registerUser(data);
 			console.log('Register response from backend:', response);
 
@@ -67,6 +71,36 @@ export const registerUser = createAsyncThunk(
 	}
 );
 
+// Verify registration OTP and create account
+export const verifyRegistrationOtpThunk = createAsyncThunk(
+	'auth/verifyRegistrationOtp',
+	async (data: { firstName: string; lastName: string; email: string; password: string; otp: string }, { rejectWithValue }) => {
+		try {
+			const response = await registrationApi.verifyRegistrationOtp(data);
+			const { accessToken, refreshToken, user } = response.data;
+
+			// Save tokens
+			await saveAccessToken(accessToken);
+			await saveRefreshToken(refreshToken);
+
+			return {
+				user: {
+					id: user.id,
+					name: `${user.firstName} ${user.lastName}`,
+					email: user.email,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					role: user.role,
+				},
+				accessToken,
+				refreshToken,
+			};
+		} catch (error: any) {
+			return rejectWithValue(error.message || 'OTP verification failed');
+		}
+	}
+);
+
 // Login with new backend API
 export const loginUser = createAsyncThunk(
 	'auth/login',
@@ -77,7 +111,14 @@ export const loginUser = createAsyncThunk(
 			console.log('Login response from backend:', response);
 
 			// Backend returns: { data: { accessToken, refreshToken, user } }
-			const { accessToken, refreshToken, user } = response.data;
+			const responseData = response.data || response; // Handle potentially unwrapped response
+
+			if (!responseData || !responseData.user) {
+				console.error('Invalid login response structure:', response);
+				throw new Error('Invalid server response: missing user data');
+			}
+
+			const { accessToken, refreshToken, user } = responseData;
 
 			// Save tokens
 			await saveAccessToken(accessToken);
@@ -95,28 +136,6 @@ export const loginUser = createAsyncThunk(
 				refreshToken,
 			};
 		} catch (error: any) {
-			// Fallback to old API if new backend fails
-			try {
-				const oldResponse = await apiService.login(email, password);
-				if (oldResponse.success) {
-					// Save token from old API to storage so apiClient can use it
-					if (oldResponse.data?.token) {
-						await saveAccessToken(oldResponse.data.token);
-						// Also set as auth token for legacy checks
-						await storageService.setAuthToken(oldResponse.data.token);
-						await storageService.setUserData(oldResponse.data);
-					}
-
-					return {
-						user: oldResponse.data,
-						token: oldResponse.data?.token,
-						accessToken: oldResponse.data?.token, // Map legacy token to accessToken as well
-						refreshToken: null,
-					};
-				}
-			} catch (fallbackError) {
-				console.log('Old API also failed');
-			}
 			return rejectWithValue(error.message || 'Login failed');
 		}
 	}
@@ -214,6 +233,26 @@ const authSlice = createSlice({
 				console.log('Registration successful:', action.payload.user?.name);
 			})
 			.addCase(registerUser.rejected, (state, action) => {
+				state.loading = false;
+				state.error = action.payload as string;
+			});
+
+		// Verify Registration OTP cases
+		builder
+			.addCase(verifyRegistrationOtpThunk.pending, (state) => {
+				state.loading = true;
+				state.error = null;
+			})
+			.addCase(verifyRegistrationOtpThunk.fulfilled, (state, action) => {
+				state.loading = false;
+				state.isAuthenticated = true;
+				state.isGuestMode = false;
+				state.user = action.payload.user;
+				state.accessToken = action.payload.accessToken;
+				state.refreshToken = action.payload.refreshToken;
+				console.log('Email verification & registration successful:', action.payload.user?.name);
+			})
+			.addCase(verifyRegistrationOtpThunk.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload as string;
 			});

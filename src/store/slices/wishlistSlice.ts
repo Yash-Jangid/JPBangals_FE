@@ -30,9 +30,16 @@ const initialState: WishlistState = {
 // Async thunks
 export const fetchWishlist = createAsyncThunk(
     'wishlist/fetchWishlist',
-    async ({ page = 1, limit = 20 }: { page?: number; limit?: number } = {}) => {
-        const response = await wishlistApi.fetchWishlist(page, limit);
-        return response;
+    async ({ page = 1, limit = 20 }: { page?: number; limit?: number } = {}, { rejectWithValue }) => {
+        try {
+            const response = await wishlistApi.fetchWishlist(page, limit);
+            return response;
+        } catch (error: any) {
+            return rejectWithValue({
+                message: error.message,
+                status: error.response?.status
+            });
+        }
     }
 );
 
@@ -93,9 +100,14 @@ const wishlistSlice = createSlice({
                     state.count = action.payload.meta?.total || 0;
                 }
             })
-            .addCase(fetchWishlist.rejected, (state, action) => {
+            .addCase(fetchWishlist.rejected, (state, action: any) => {
                 state.isLoading = false;
-                state.error = action.error.message || 'Failed to fetch wishlist';
+                // Suppress 401 Unauthorized errors (handled by auth interceptors/logic)
+                if (action.payload?.status === 401) {
+                    state.error = null;
+                } else {
+                    state.error = action.payload?.message || action.error.message || 'Failed to fetch wishlist';
+                }
             });
 
         // Add to wishlist

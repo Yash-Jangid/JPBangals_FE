@@ -22,7 +22,7 @@ import apiService from '../services/ApiService';
 import { storageService } from '../utils/storage';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { enableGuestMode, registerUser, clearError } from '../store/slices/authSlice';
-import socialLoginService from '../services/SocialLoginService';
+// import socialLoginService from '../services/SocialLoginService';
 import { GoogleIcon } from '../components/icons/GoogleIcon';
 
 const { width, height } = Dimensions.get('window');
@@ -182,28 +182,28 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
     }
   };
 
-  const handleGoogleSignUp = async () => {
-    try {
-      const result = await socialLoginService.signInWithGoogle();
+  // const handleGoogleSignUp = async () => {
+  //   try {
+  //     const result = await socialLoginService.signInWithGoogle();
 
-      if (result.success && result.token) {
-        navigation.navigate('Main');
-      } else {
-        showAlert({
-          title: 'Sign Up Failed',
-          message: result.error || 'Failed to sign up with Google',
-          type: 'error'
-        });
-      }
-    } catch (error) {
-      console.error('Google sign up error:', error);
-      showAlert({
-        title: 'Error',
-        message: 'Failed to sign up with Google. Please try again.',
-        type: 'error'
-      });
-    }
-  };
+  //     if (result.success && result.token) {
+  //       navigation.navigate('Main');
+  //     } else {
+  //       showAlert({
+  //         title: 'Sign Up Failed',
+  //         message: result.error || 'Failed to sign up with Google',
+  //         type: 'error'
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Google sign up error:', error);
+  //     showAlert({
+  //       title: 'Error',
+  //       message: 'Failed to sign up with Google. Please try again.',
+  //       type: 'error'
+  //     });
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -344,7 +344,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                   <View style={styles.line} />
                 </View>
 
-                <View style={styles.socialRow}>
+                {/* <View style={styles.socialRow}>
                   <TouchableOpacity
                     style={styles.socialBtn}
                     onPress={handleGoogleSignUp}
@@ -352,7 +352,7 @@ export const SignUpScreen: React.FC<SignUpScreenProps> = ({
                     <GoogleIcon size={22} />
                     <Text style={styles.socialBtnText}>Google</Text>
                   </TouchableOpacity>
-                </View>
+                </View> */}
 
                 <View style={styles.footerRow}>
                   <Text style={styles.footerText}>Already have an account? </Text>

@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { registerUser, clearError, enableGuestMode } from '../store/slices/authSlice';
+import { sendRegistrationOtp } from '../api/registrationApi';
 import { User, Mail, Lock, Eye, EyeOff, ChevronLeft, ArrowRight } from 'lucide-react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { GoogleIcon } from '../components/icons/GoogleIcon';
@@ -43,6 +44,7 @@ export const SignUpNewScreen: React.FC<SignUpNewScreenProps> = ({ navigation }) 
     const [localLoading, setLocalLoading] = useState(false);
 
     useEffect(() => {
+        dispatch(clearError());
         return () => {
             dispatch(clearError());
         };
@@ -73,27 +75,47 @@ export const SignUpNewScreen: React.FC<SignUpNewScreenProps> = ({ navigation }) 
             const nameParts = fullName.trim().split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || firstName;
+            const cleanEmail = email.trim().toLowerCase();
+            const cleanPassword = password.trim();
 
-            const result = await dispatch(registerUser({
+            // S4: Send OTP instead of direct registration
+            // Ensure this import exists: import { sendRegistrationOtp } from '../api/registrationApi';
+            // Since we can't easily add the import in this block, we'll rely on the user adding it or doing it in a separate step.
+            // Wait, I can try to use dynamic import or just hope the top-level import is added.
+            // Actually, I should add the import first. But I'll do this logic assuming import exists.
+
+            // Note: I will add the import in a separate tool call to be safe.
+
+            // For now, let's assume the component will be updated with the import in the next step.
+            // But since I can't add import here, let me invoke the API directly if possible or just update the logic 
+            // and I will add the import in the next tool call properly.
+
+            const response = await sendRegistrationOtp({
                 firstName,
                 lastName,
-                email: email.trim().toLowerCase(),
-                password: password.trim(),
-            }));
+                email: cleanEmail,
+                password: cleanPassword,
+            });
 
-            if (registerUser.fulfilled.match(result)) {
-                // Success handled by useEffect redirection
-                showAlert({
-                    title: 'Registration Successful',
-                    message: 'Welcome to Jaipur Bangles! Redirecting you...',
-                    type: 'success'
-                });
-            }
-        } catch (err) {
+            showAlert({
+                title: 'Verification Code Sent',
+                message: `We've sent a code to ${cleanEmail}`,
+                type: 'success'
+            });
+
+            // Navigate to OTP screen with params
+            navigation.navigate('VerifyEmailOTP', {
+                email: cleanEmail,
+                firstName,
+                lastName,
+                password: cleanPassword,
+            });
+
+        } catch (err: any) {
             console.error('Signup Error:', err);
             showAlert({
                 title: 'Error',
-                message: 'An unexpected error occurred. Please try again.',
+                message: err.message || 'Failed to send verification code. Please try again.',
                 type: 'error'
             });
         } finally {

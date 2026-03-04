@@ -8,6 +8,7 @@ export type RootStackParamList = {
   SignUpNew: undefined;
   ForgotPassword: undefined;
   VerifyOTP: { email: string };
+  VerifyEmailOTP: { email: string; firstName: string; lastName: string; password: string };
   ResetPassword: { email: string; otp: string };
 
   // Main Tab

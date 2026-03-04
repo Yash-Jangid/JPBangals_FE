@@ -29,9 +29,6 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  useEffect(() => {
-    console.log('🏁 [SplashTrace] JS: App Root Provider mounted.');
-  }, []);
 
   return (
     <Provider store={store}>

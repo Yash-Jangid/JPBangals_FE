@@ -24,6 +24,7 @@ import { OrderDetailsScreen } from '../screens/OrderDetailsScreen';
 // import { WebViewScreen } from '../components/WebViewScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import VerifyOTPScreen from '../screens/VerifyOTPScreen';
+import VerifyEmailOTPScreen from '../screens/VerifyEmailOTPScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import WishlistScreen from '../screens/WishlistScreen';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
@@ -181,6 +182,7 @@ export const AppNavigator = () => {
               <Stack.Screen name="SignUp" component={SignUpNewScreen} />
               <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
               <Stack.Screen name="VerifyOTP" component={VerifyOTPScreen} />
+              <Stack.Screen name="VerifyEmailOTP" component={VerifyEmailOTPScreen} />
               <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
             </Stack.Group>
           )}
